@@ -1,0 +1,129 @@
+{
+  "id": 1,
+  "niche": "Dentists and Dental Clinics",
+  "tagline": "Bright smiles, seamless care",
+  "color_scheme": {
+    "primary": "#0EA5E9",
+    "accent": "#0284C7",
+    "background": "#F0F9FF",
+    "card": "#FFFFFF",
+    "text": "#0C4A6E",
+    "palette_names": [
+      "Sky Blue",
+      "Deep Blue",
+      "Ice Background",
+      "White",
+      "Navy Text"
+    ]
+  },
+  "typography": {
+    "heading": "Plus Jakarta Sans",
+    "body": "DM Sans",
+    "decorative": "DM Serif Display"
+  },
+  "pages": [
+    {
+      "name": "Home / Landing",
+      "sections": [
+        "Hero: Full-screen with smiling patient photo, headline, 'Book Appointment' CTA",
+        "Trust bar: patient count, years in practice, 5-star rating — animated counters",
+        "Services overview: 6-card grid with icons (cleaning, whitening, braces, implants, etc.)",
+        "Why choose us: 3-column feature blocks with icons",
+        "Doctor introduction: photo + credentials + quick bio",
+        "Testimonials: carousel with star ratings and patient photos",
+        "Before & after smile gallery: comparison slider",
+        "FAQ accordion",
+        "Booking CTA section",
+        "Footer"
+      ]
+    },
+    {
+      "name": "Services",
+      "sections": [
+        "Hero with service categories",
+        "Detailed service cards with pricing ranges",
+        "Treatment process steps",
+        "Insurance info accordion",
+        "CTA to book"
+      ]
+    },
+    {
+      "name": "About Us",
+      "sections": [
+        "Clinic story + founding year",
+        "Mission & values",
+        "Doctor/team profiles with hover flip cards",
+        "Certifications & affiliations",
+        "Clinic gallery / virtual tour embed"
+      ]
+    },
+    {
+      "name": "Booking / Appointment",
+      "sections": [
+        "Step-form: choose service → choose doctor → pick date/time → patient info → confirmation",
+        "Calendar date picker",
+        "Available time slots grid",
+        "Confirmation email note"
+      ]
+    },
+    {
+      "name": "Contact",
+      "sections": [
+        "Google Maps embed",
+        "Contact form",
+        "Phone, email, address",
+        "Opening hours table",
+        "WhatsApp direct link"
+      ]
+    },
+    {
+      "name": "Blog",
+      "sections": [
+        "Post grid with category filter",
+        "Featured post hero",
+        "Search bar",
+        "Newsletter CTA"
+      ]
+    },
+    {
+      "name": "FAQ",
+      "sections": [
+        "Accordion by category: General, Procedures, Insurance, Payment"
+      ]
+    },
+    {
+      "name": "Privacy Policy",
+      "sections": ["Full GDPR/PDPA compliant privacy policy content"]
+    },
+    { "name": "Terms of Service", "sections": ["Standard T&C content"] }
+  ],
+  "gsap_animations": [
+    "Hero: headline SplitText char-by-char entrance + patient photo scale-in",
+    "Trust bar: number counter from 0 when scrolled into view",
+    "Service cards: staggered fade-up on scroll (ScrollTrigger batch)",
+    "Before/after slider: reveal animation on scroll enter",
+    "Testimonials: horizontal marquee using GSAP ticker",
+    "Section headings: SplitText word reveal",
+    "Sticky navbar: shrink + blur-backdrop on scroll",
+    "Booking form: smooth step transitions with GSAP timeline",
+    "Lenis: global smooth scroll with damping 0.1, lerp 0.05"
+  ],
+  "key_features": [
+    "Multi-step appointment booking form",
+    "Before/after smile comparison slider (react-compare-image)",
+    "Doctor profile flip cards",
+    "Insurance provider accordion",
+    "Google Maps embed with styled map",
+    "WhatsApp chat widget",
+    "Blog with MDX support",
+    "Mobile-responsive hamburger nav with GSAP drawer"
+  ],
+  "extra_packages": [
+    "react-compare-image",
+    "swiper",
+    "react-datepicker",
+    "react-hook-form",
+    "@radix-ui/react-accordion",
+    "shadcn/ui"
+  ]
+}
