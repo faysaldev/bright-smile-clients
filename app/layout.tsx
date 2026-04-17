@@ -4,6 +4,7 @@ import "./globals.css";
 import { StoreProvider } from "@/src/components/providers/StoreProvider";
 import { LenisProvider } from "@/src/components/providers/LenisProvider";
 import LayoutWrapper from "@/src/components/common/LayoutWrapper";
+import ReduxProvider from "@/src/Provider/ReduxProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +32,13 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <StoreProvider>
-          <LenisProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
-          </LenisProvider>
-        </StoreProvider>
+        <ReduxProvider>
+          <StoreProvider>
+            <LenisProvider>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </LenisProvider>
+          </StoreProvider>
+        </ReduxProvider>
       </body>
     </html>
   );
