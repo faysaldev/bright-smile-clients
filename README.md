@@ -25,29 +25,193 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Backend Architecture Requirements
+## Detailed Backend API Specification
 
-To fully realize the functionalities of this frontend application, a backend API should be constructed to handle **Booking** and **Contact/Leads**.
+To fully utilize this frontend, a robust backend API is required. Below are the detailed specifications for each module.
 
-### 1. Booking System
+### 1. Base Configuration
+- **Base URL:** `https://api.brightsmile.example.com/v1`
+- **Auth Strategy:** JWT (JSON Web Tokens) for Admin Access.
+- **Headers:** 
+  - `Content-Type: application/json`
+  - `Authorization: Bearer <token>` (for protected routes)
 
-The multi-step booking process (`/booking`) relies on the Redux state via `bookingSlice`. The required backend endpoints should include:
+---
 
-- **`GET /api/doctors`**: Returns a list of available doctors and their operational specialties.
-- **`GET /api/availability?doctorId={id}&date={date}`**: Returns an array of available 30-minute time slots for the given date.
-- **`POST /api/appointments`**:
-  - **Payload:** `{ serviceId: String, doctorId: String, date: String, timeSlot: String, patientInfo: { name, email, phone, notes } }`
-  - **Action:** Creates an appointment in the database (e.g., PostgreSQL or MongoDB), handles double-booking collision checks, and triggers confirmation emails via SendGrid/AWS SES.
+### 2. Authentication (Admin)
+For managing the clinic dashboard.
 
-### 2. Contact & Lead Generation
+- **`POST /api/auth/login`**
+  - **Payload:** `{ email, password }`
+  - **Response:** `{ user: { id, name, email }, token: "string" }`
+- **`POST /api/auth/logout`**
+  - **Action:** Invalidate JWT token.
 
-The contact form and lead capture should send data securely to the backend.
+---
 
-- **`POST /api/contact`**:
-  - **Payload:** `{ name: String, email: String, phone: String, subject: String, message: String }`
-  - **Action:** Stores the lead securely in the database and notifies the clinic's reception desk.
+### 3. Doctors API
+Manages the dental professional profiles.
 
-### 3. CMS for Blog
+- **`GET /api/doctors`**: Returns a list of all doctors.
+- **`GET /api/doctors/:id`**: Returns specific doctor details.
+- **`POST /api/doctors`** (Admin): Create a new doctor profile.
+- **`PUT /api/doctors/:id`** (Admin): Update profile details.
+- **`DELETE /api/doctors/:id`** (Admin): Remove a profile.
 
-- The current `/blog` is statically rendered based on mock data.
-- A Headless CMS integration (like Sanity, Contentful, or Strapi) is highly recommended, paired with Next.js ISR (Incremental Static Regeneration) fetching data from an endpoint similar to `GET /api/posts`.
+**Doctor Schema:**
+```json
+{
+  "id": "string",
+  "name": "string",
+  "role": "string",
+  "specialty": "string",
+  "bio": "string",
+  "image": "url_string",
+  "education": ["string"],
+  "experience": "string"
+}
+```
+
+---
+
+### 4. Services API
+Manages the dental procedures offered.
+
+- **`GET /api/services`**: Returns all services.
+- **`GET /api/services/:slug`**: Returns detailed service info.
+- **`POST /api/services`** (Admin): Add a new service.
+- **`PUT /api/services/:id`** (Admin): Update service details.
+
+**Service Schema:**
+```json
+{
+  "id": "string",
+  "slug": "string",
+  "title": "string",
+  "description": "string",
+  "longDescription": "string",
+  "icon": "lucide_icon_name",
+  "color": "gradient_string",
+  "priceRange": "string",
+  "duration": "string",
+  "benefits": ["string"],
+  "process": [{ "step": number, "title": "string", "desc": "string" }],
+  "image": "url_string"
+}
+```
+
+---
+
+### 5. Blog & CMS API
+Handles educational content and clinic news.
+
+- **`GET /api/blog`**: List posts with pagination & category filtering.
+- **`GET /api/blog/:slug`**: Get full post content.
+- **`POST /api/blog`** (Admin): Create a new post.
+- **`PUT /api/blog/:id`** (Admin): Update post.
+- **`DELETE /api/blog/:id`** (Admin): Delete post.
+
+**Blog Post Schema:**
+```json
+{
+  "id": "string",
+  "slug": "string",
+  "title": "string",
+  "excerpt": "string",
+  "content": "markdown_or_html_string",
+  "author": { "name": "string", "role": "string", "avatar": "url" },
+  "category": "string",
+  "tags": ["string"],
+  "publishDate": "iso_date",
+  "image": "url_string",
+  "readTime": "string"
+}
+```
+
+---
+
+### 6. Booking & Appointment API
+The core transactional engine of the application.
+
+- **`GET /api/availability?doctorId={id}&date={iso_date}`**: Check slots.
+- **`POST /api/appointments`**: Create a booking.
+- **`GET /api/appointments`** (Admin): List all bookings with filters.
+- **`PUT /api/appointments/:id`** (Admin): Update status (Confirmed, Cancelled, Completed).
+
+**Appointment Payload:**
+```json
+{
+  "serviceId": "string",
+  "doctorId": "string",
+  "date": "iso_date",
+  "timeSlot": "string",
+  "patientInfo": {
+    "name": "string",
+    "email": "string",
+    "phone": "string",
+    "isNewPatient": boolean,
+    "notes": "string"
+  }
+}
+```
+
+---
+
+### 7. Contact & Leads API
+Captures general inquiries.
+
+- **`POST /api/contact`**: Submit contact form.
+- **`GET /api/contact`** (Admin): View inquiries.
+
+**Lead Schema:**
+```json
+{
+  "name": "string",
+  "email": "string",
+  "phone": "string",
+  "subject": "string",
+  "message": "string",
+  "status": "unread | read | replied"
+}
+```
+
+---
+
+### 8. Testimonials & Reviews API
+- **`GET /api/testimonials`**: Public list.
+- **`POST /api/testimonials`** (Admin): Add/Approve patient reviews.
+
+**Schema:** `{ name, role, text, rating, avatar }`
+
+---
+
+### 9. Clinic Settings API (Admin Only)
+Manages global clinic data used in Header/Footer/Contact page.
+
+- **`GET /api/settings`**
+- **`PUT /api/settings`**
+
+**Settings Schema:**
+```json
+{
+  "clinicName": "string",
+  "contactEmail": "string",
+  "phone": "string",
+  "address": "string",
+  "mapEmbedUrl": "url",
+  "whatsappNumber": "string",
+  "openingHours": {
+    "mon_fri": "string",
+    "sat": "string",
+    "sun": "string"
+  }
+}
+```
+
+---
+
+### 10. Asset Management API (Admin Only)
+- **`POST /api/assets/upload`**
+  - **Payload:** `multipart/form-data` (image/pdf)
+  - **Response:** `{ url: "string", publicId: "string" }`
+
