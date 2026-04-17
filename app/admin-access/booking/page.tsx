@@ -20,6 +20,7 @@ export default function AdminBookings() {
     {
       id: "B-1021",
       patient: "Sarah Miller",
+      email: "sarah@example.com",
       phone: "(555) 123-4567",
       service: "Teeth Whitening",
       date: "2026-10-24",
@@ -30,6 +31,7 @@ export default function AdminBookings() {
     {
       id: "B-1022",
       patient: "Michael Chen",
+      email: "michael@example.com",
       phone: "(555) 987-6543",
       service: "General Checkup",
       date: "2026-10-24",
@@ -40,6 +42,7 @@ export default function AdminBookings() {
     {
       id: "B-1023",
       patient: "Emily Davis",
+      email: "emily@example.com",
       phone: "(555) 456-7890",
       service: "Dental Implants",
       date: "2026-10-24",
@@ -50,6 +53,7 @@ export default function AdminBookings() {
     {
       id: "B-1024",
       patient: "James Wilson",
+      email: "james@example.com",
       phone: "(555) 789-0123",
       service: "Orthodontics",
       date: "2026-10-23",
@@ -60,6 +64,7 @@ export default function AdminBookings() {
     {
       id: "B-1025",
       patient: "Patricia Brown",
+      email: "patricia@example.com",
       phone: "(555) 234-5678",
       service: "Root Canal",
       date: "2026-10-23",
@@ -89,6 +94,7 @@ export default function AdminBookings() {
     const newBooking = {
       id: `B-${Math.floor(1000 + Math.random() * 9000)}`,
       patient: formData.get("patient") as string,
+      email: formData.get("email") as string,
       phone: formData.get("phone") as string,
       service: formData.get("service") as string,
       date: formData.get("date") as string,
@@ -268,7 +274,7 @@ export default function AdminBookings() {
         title="Add New Booking"
       >
         <form onSubmit={handleAddBooking} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Patient Name
@@ -281,6 +287,17 @@ export default function AdminBookings() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Email Address
+              </label>
+              <input
+                name="email"
+                type="email"
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                required
+              />
+            </div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Phone
               </label>

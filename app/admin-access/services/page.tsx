@@ -69,6 +69,8 @@ export default function AdminServices() {
       category: formData.get("category") as string,
       price: formData.get("price") as string,
       duration: formData.get("duration") as string,
+      description: formData.get("description") as string,
+      specifications: formData.get("specifications") as string,
       active: formData.get("active") === "true",
     };
 
@@ -265,6 +267,33 @@ export default function AdminServices() {
               />
             </div>
           </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Description
+            </label>
+            <textarea
+              name="description"
+              defaultValue={editingService?.description}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm h-24 resize-none"
+              placeholder="Brief description of the service..."
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Specifications (Bullet Points)
+            </label>
+            <textarea
+              name="specifications"
+              defaultValue={editingService?.specifications}
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm h-32 resize-none"
+              placeholder="Enter each specification on a new line&#10;e.g.&#10;Comprehensive oral exam&#10;Detailed x-rays included"
+            />
+            <p className="text-xs text-slate-400 mt-1">Enter each point on a new line.</p>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Status
