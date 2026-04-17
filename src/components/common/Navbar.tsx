@@ -37,15 +37,8 @@ const Navbar = () => {
       }`}
     >
       <div className="container-narrow flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-heading font-bold text-lg">
-              B
-            </span>
-          </div>
-          <span className="font-heading font-bold text-xl text-foreground">
-            BrightSmile
-          </span>
+        <Link href="/" className="flex items-center">
+          <img src="/logo-bg.png" alt="BrightSmile" className="h-10 w-auto" />
         </Link>
 
         {/* Desktop */}

@@ -6,13 +6,8 @@ const Footer = () => (
     <div className="container-narrow section-padding pb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
         <div>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-heading font-bold">
-                B
-              </span>
-            </div>
-            <span className="font-heading font-bold text-lg">BrightSmile</span>
+          <div className="flex items-center mb-6">
+            <img src="/logo-bg.png" alt="BrightSmile" className="h-12 w-auto brightness-0 invert" />
           </div>
           <p className="text-sm opacity-70 leading-relaxed">
             Delivering world-class dental care with compassion and cutting-edge
