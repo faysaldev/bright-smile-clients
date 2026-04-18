@@ -20,6 +20,8 @@ const BlogPost = () => {
   const { data: post, isLoading, isError } = useGetPostBySlugQuery(slug);
   const { data: allPosts } = useGetAllPostsQuery({});
 
+  console.log(post);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
@@ -48,76 +50,6 @@ const BlogPost = () => {
   }
 
   if (!post) return null;
-
-  // Simple markdown-like rendering
-  const renderContent = (text: string) => {
-    if (!text) return null;
-    return text.split("\n\n").map((block, i) => {
-      if (block.startsWith("## ")) {
-        return (
-          <h2 key={i} className="text-2xl font-heading font-bold mt-10 mb-4">
-            {block.replace("## ", "")}
-          </h2>
-        );
-      }
-      if (block.startsWith("### ")) {
-        return (
-          <h3 key={i} className="text-xl font-heading font-semibold mt-8 mb-3">
-            {block.replace("### ", "")}
-          </h3>
-        );
-      }
-      if (block.startsWith("- ")) {
-        const items = block.split("\n").filter((l) => l.startsWith("- "));
-        return (
-          <ul key={i} className="list-none space-y-2 my-4">
-            {items.map((item, j) => (
-              <li
-                key={j}
-                className="flex items-start gap-2 text-muted-foreground leading-relaxed"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-                {item.replace("- ", "")}
-              </li>
-            ))}
-          </ul>
-        );
-      }
-      if (block.startsWith("1. ")) {
-        const items = block.split("\n").filter((l) => /^\d+\./.test(l));
-        return (
-          <ol key={i} className="space-y-2 my-4">
-            {items.map((item, j) => (
-              <li
-                key={j}
-                className="flex items-start gap-3 text-muted-foreground leading-relaxed"
-              >
-                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {j + 1}
-                </span>
-                {item.replace(/^\d+\.\s*/, "")}
-              </li>
-            ))}
-          </ol>
-        );
-      }
-      // Handle bold text within paragraphs
-      const parts = block.split(/(\*\*[^*]+\*\*)/g);
-      return (
-        <p key={i} className="text-muted-foreground leading-relaxed my-4">
-          {parts.map((part, j) =>
-            part.startsWith("**") && part.endsWith("**") ? (
-              <strong key={j} className="font-semibold text-foreground">
-                {part.slice(2, -2)}
-              </strong>
-            ) : (
-              part
-            ),
-          )}
-        </p>
-      );
-    });
-  };
 
   // Related posts
   const related =
@@ -150,7 +82,7 @@ const BlogPost = () => {
                 <Calendar className="w-4 h-4" /> {formatDate(post.publishDate)}
               </span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4" /> {post.readTime}
+                <Clock className="w-4 h-4" /> {post.readTime || "5 min"}
               </span>
             </div>
           </div>
@@ -168,9 +100,10 @@ const BlogPost = () => {
             ) : (
               <div className="h-72 sm:h-96 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 mb-10" />
             )}
-            <article className="prose-custom">
-              {renderContent(post.content)}
-            </article>
+            <article 
+              className="prose prose-slate max-w-none text-slate-700 font-medium leading-relaxed prose-headings:font-black prose-headings:tracking-tight prose-p:text-lg prose-p:leading-8 prose-strong:text-slate-900"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
 
             {/* Share */}
             <div className="mt-12 pt-8 border-t border-border flex items-center justify-between">
