@@ -2,13 +2,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "@/src/redux/store/store"; // Make sure this is correct
 
 interface User {
-  _id: string;
   name: string;
   email: string;
-  image: string | null;
-  role: "user" | "seller" | "admin";
-  dateOfBirth: string;
-  isEmailVerified: boolean;
+  id: string;
 }
 
 type TAuthState = {

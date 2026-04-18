@@ -52,7 +52,7 @@ const BookingCTA = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="gap-2 text-base border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 rounded-xl"
+                className="gap-2 text-base border-primary-foreground/30 text-black hover:bg-primary-foreground/10 px-8 py-6 rounded-xl"
                 asChild
               >
                 <a href="tel:+1234567890">

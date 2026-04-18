@@ -1,17 +1,17 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Phone } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { useGetSettingsQuery } from "@/src/redux/features/settings/settingsApi";
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
   { label: "Blog", href: "/blog" },
-  { label: "FAQ", href: "/faq" },
+  { label: "Specialists", href: "/specialist" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -19,6 +19,7 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { data: settings } = useGetSettingsQuery(undefined);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -60,11 +61,11 @@ const Navbar = () => {
 
         <div className="hidden md:flex items-center gap-3">
           <a
-            href="tel:+1234567890"
+            href={`tel:${settings?.phone || "+1234567890"}`}
             className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <Phone className="w-4 h-4" />
-            (123) 456-7890
+            {settings?.phone || "(123) 456-7890"}
           </a>
           <Button asChild>
             <Link href="/booking">Book Appointment</Link>

@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   description: "Bright smiles, seamless care. Book your appointment today.",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,11 +35,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ReduxProvider>
-          <StoreProvider>
-            <LenisProvider>
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </LenisProvider>
-          </StoreProvider>
+          <LenisProvider>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </LenisProvider>
+          <Toaster position="top-center" richColors />
         </ReduxProvider>
       </body>
     </html>

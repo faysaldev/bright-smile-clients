@@ -1,6 +1,8 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
+import { useGetTestimonialsQuery } from "@/src/redux/features/testimonials/testimonialsApi";
+import { Button } from "../ui/button";
 
 const testimonials = [
   {
@@ -53,83 +55,132 @@ const Testimonials = () => {
       {
         y: 0,
         opacity: 1,
-        duration: 0.8,
+        duration: 1,
         ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 80%" },
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+        },
       },
     );
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
   }, []);
 
-  const next = () => setActive((a) => (a + 1) % testimonials.length);
-  const prev = () =>
-    setActive((a) => (a - 1 + testimonials.length) % testimonials.length);
+  const { data: testimonialsData, isLoading } = useGetTestimonialsQuery(undefined);
+  
+  const displayTestimonials =
+    testimonialsData && testimonialsData.length > 0
+      ? testimonialsData.filter((t: any) => !t.status || t.status === "approved")
+      : [];
+
+  const next = useCallback(() => {
+    if (displayTestimonials.length === 0) return;
+    setActive((prev) => (prev + 1) % displayTestimonials.length);
+  }, [displayTestimonials.length]);
+
+  const prev = () => {
+    if (displayTestimonials.length === 0) return;
+    setActive(
+      (prev) =>
+        (prev - 1 + displayTestimonials.length) % displayTestimonials.length,
+    );
+  };
 
   useEffect(() => {
-    const id = setInterval(next, 5000);
-    return () => clearInterval(id);
-  }, []);
+    if (displayTestimonials.length === 0) return;
+    const interval = setInterval(next, 6000);
+    return () => clearInterval(interval);
+  }, [next, displayTestimonials.length]);
 
-  const t = testimonials[active];
+  if (isLoading || displayTestimonials.length === 0) return null;
 
   return (
-    <section className="section-padding bg-gradient-to-b from-secondary/40 to-background">
-      <div ref={sectionRef} className="container-narrow">
-        <div className="text-center mb-14">
+    <section className="section-padding bg-background overflow-hidden">
+      <div className="container-narrow">
+        <div className="text-center mb-16">
           <span className="text-sm font-medium text-primary uppercase tracking-wider">
-            Testimonials
+            Patient Stories
           </span>
-          <h2 className="text-3xl sm:text-5xl font-heading font-bold mt-2 mb-4">
+          <h2 className="text-3xl sm:text-5xl font-heading font-bold mt-2">
             What Our Patients Say
           </h2>
         </div>
-        <div className="max-w-3xl mx-auto">
-          <div className="glass-card p-8 sm:p-12 rounded-3xl relative">
-            <Quote className="w-12 h-12 text-primary/20 absolute top-6 left-6" />
-            <div className="text-center relative z-10">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-6 text-primary-foreground text-xl font-bold">
-                {t.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </div>
-              <div className="flex justify-center gap-1 mb-4">
-                {Array.from({ length: t.rating }).map((_, i) => (
+
+        <div className="relative max-w-4xl mx-auto">
+          {/* Decorative elements */}
+          <div className="absolute -top-10 -left-10 text-primary/10 select-none">
+            <Quote className="w-32 h-32 rotate-180" />
+          </div>
+
+          <div className="relative z-10 glass-card p-10 sm:px-16 sm:py-14 rounded-[2rem] shadow-2xl shadow-primary/5">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className="w-5 h-5 fill-amber-400 text-amber-400"
+                    className={`w-5 h-5 ${
+                      i < displayTestimonials[active].rating
+                        ? "text-amber-400 fill-amber-400"
+                        : "text-muted border-muted"
+                    }`}
                   />
                 ))}
               </div>
-              <p className="text-lg sm:text-xl leading-relaxed text-foreground mb-6 font-medium italic">
-                "{t.text}"
-              </p>
-              <p className="font-heading font-bold text-lg">{t.name}</p>
-              <p className="text-sm text-muted-foreground">{t.role}</p>
+
+              <blockquote className="text-xl sm:text-2xl font-medium leading-relaxed mb-10 italic">
+                "{displayTestimonials[active].text}"
+              </blockquote>
+
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent overflow-hidden">
+                  <img
+                    src={
+                      displayTestimonials[active].avatar ||
+                      "/default-avatar.png"
+                    }
+                    alt={displayTestimonials[active].name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-left">
+                  <p className="font-heading font-bold">
+                    {displayTestimonials[active].name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{displayTestimonials[active].role || "Patient"}</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="flex items-center justify-center gap-4 mt-8">
-            <button
+
+          {/* Controls */}
+          <div className="flex justify-center items-center gap-4 mt-10">
+            <Button
+              variant="outline"
+              size="icon"
               onClick={prev}
-              className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-secondary transition-colors"
+              className="rounded-full w-12 h-12 border-primary/20 hover:bg-primary hover:text-white transition-all shadow-md"
             >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+              <ChevronLeft className="w-6 h-6" />
+            </Button>
             <div className="flex gap-2">
-              {testimonials.map((_, i) => (
+              {displayTestimonials.map((_: any, i: number) => (
                 <button
                   key={i}
                   onClick={() => setActive(i)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${i === active ? "bg-primary w-8" : "bg-border hover:bg-muted-foreground/40"}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    active === i ? "w-8 bg-primary" : "w-2 bg-primary/20"
+                  }`}
+                  aria-label={`Go to testimonial ${i + 1}`}
                 />
               ))}
             </div>
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               onClick={next}
-              className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-secondary transition-colors"
+              className="rounded-full w-12 h-12 border-primary/20 hover:bg-primary hover:text-white transition-all shadow-md"
             >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+              <ChevronRight className="w-6 h-6" />
+            </Button>
           </div>
         </div>
       </div>

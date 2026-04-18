@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/src/lib/store/store";
+import { RootState } from "@/src/redux/store/store";
 import {
   setNextStep,
   setPrevStep,
@@ -10,7 +10,8 @@ import {
   setDoctor,
   setDateTime,
   setPatientInfo,
-} from "@/src/lib/store/bookingSlice";
+  resetBooking,
+} from "@/src/redux/features/booking/bookingSlice";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Calendar } from "@/src/components/ui/calendar";
@@ -25,48 +26,13 @@ import {
   Sparkles,
 } from "lucide-react";
 import { gsap } from "@/src/hooks/useGsap";
-
-const services = [
-  "Teeth Cleaning",
-  "Teeth Whitening",
-  "Dental Implants",
-  "Orthodontics",
-  "Cosmetic Dentistry",
-  "Emergency Care",
-];
-const doctors = [
-  {
-    name: "Dr. James Mitchell",
-    specialty: "General & Cosmetic Dentistry",
-    exp: "20+ years",
-  },
-  {
-    name: "Dr. Sarah Chen",
-    specialty: "Orthodontics & Pediatric",
-    exp: "15+ years",
-  },
-  {
-    name: "Dr. Michael Brown",
-    specialty: "Oral Surgery & Implants",
-    exp: "12+ years",
-  },
-];
-const timeSlots = [
-  "9:00 AM",
-  "9:30 AM",
-  "10:00 AM",
-  "10:30 AM",
-  "11:00 AM",
-  "11:30 AM",
-  "1:00 PM",
-  "1:30 PM",
-  "2:00 PM",
-  "2:30 PM",
-  "3:00 PM",
-  "3:30 PM",
-  "4:00 PM",
-  "4:30 PM",
-];
+import { useGetAllServicesQuery } from "@/src/redux/features/services/servicesApi";
+import { useGetAllDoctorsQuery } from "@/src/redux/features/doctors/doctorsApi";
+import {
+  useCheckAvailabilityQuery,
+  useCreateAppointmentMutation,
+} from "@/src/redux/features/appointments/appointmentsApi";
+import { toast } from "sonner";
 
 const stepsConfig = [
   { label: "Service", icon: CalendarCheck },
@@ -83,11 +49,20 @@ const Booking = () => {
 
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // API Hooks
+  const { data: services, isLoading: loadingServices } = useGetAllServicesQuery(undefined);
+  const { data: doctors, isLoading: loadingDoctors } = useGetAllDoctorsQuery(undefined);
+  const { data: availableSlots, isFetching: loadingSlots } = useCheckAvailabilityQuery(
+    { doctor_id: doctorId!, date: date! },
+    { skip: !doctorId || !date }
+  );
+  const [createAppointment, { isLoading: isSubmitting }] = useCreateAppointmentMutation();
+
   const canNext = () => {
     if (step === 1) return !!serviceId;
     if (step === 2) return !!doctorId;
     if (step === 3) return !!date && !!timeSlot;
-    if (step === 4) return !!patientInfo?.name && !!patientInfo?.email;
+    if (step === 4) return !!patientInfo?.name && !!patientInfo?.email && !!patientInfo?.phone;
     return false;
   };
 
@@ -105,8 +80,25 @@ const Booking = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleNext = () => {
-    if (canNext()) {
+  const handleNext = async () => {
+    if (step === 4) {
+      try {
+        await createAppointment({
+          doctor_id: doctorId!,
+          service_id: serviceId!,
+          appointment_date: date!,
+          appointment_time: timeSlot!,
+          patient_name: patientInfo!.name,
+          patient_email: patientInfo!.email,
+          patient_phone: patientInfo!.phone,
+          notes: patientInfo!.notes,
+        }).unwrap();
+        dispatch(setNextStep());
+        toast.success("Appointment booked successfully!");
+      } catch (err: any) {
+        toast.error(err?.data?.message || "Failed to book appointment");
+      }
+    } else if (canNext()) {
       dispatch(setNextStep());
     }
   };
@@ -114,6 +106,9 @@ const Booking = () => {
   const handlePrev = () => {
     dispatch(setPrevStep());
   };
+
+  const selectedService = services?.find((s: any) => s._id === serviceId);
+  const selectedDoctor = doctors?.find((d: any) => d._id === doctorId);
 
   return (
     <div className="pb-16 pt-8">
@@ -166,41 +161,49 @@ const Booking = () => {
             ))}
           </div>
 
-          <div className="glass-card p-8 sm:p-10 rounded-3xl">
+          <div className="glass-card p-8 sm:p-10 rounded-3xl min-h-[400px]">
             <div ref={contentRef} key={step}>
               {step === 1 && (
                 <div className="space-y-3">
                   <h3 className="font-heading font-bold text-xl mb-6">
                     Choose a Service
                   </h3>
-                  {services.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => dispatch(setService(s))}
-                      className={cn(
-                        "w-full text-left px-6 py-4 rounded-xl border-2 transition-all text-sm font-medium group",
-                        serviceId === s
-                          ? "border-primary bg-primary/5 text-primary shadow-md shadow-primary/10"
-                          : "border-border hover:border-primary/40 hover:bg-secondary/50"
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{s}</span>
-                        <div
-                          className={cn(
-                            "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors",
-                            serviceId === s
-                              ? "border-primary bg-primary"
-                              : "border-border"
-                          )}
-                        >
-                          {serviceId === s && (
-                            <CheckCircle className="w-3 h-3 text-primary-foreground" />
-                          )}
+                  {loadingServices ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-14 bg-muted animate-pulse rounded-xl" />
+                      ))}
+                    </div>
+                  ) : (
+                    services?.map((s: any) => (
+                      <button
+                        key={s._id}
+                        onClick={() => dispatch(setService(s._id))}
+                        className={cn(
+                          "w-full text-left px-6 py-4 rounded-xl border-2 transition-all text-sm font-medium group",
+                          serviceId === s._id
+                            ? "border-primary bg-primary/5 text-primary shadow-md shadow-primary/10"
+                            : "border-border hover:border-primary/40 hover:bg-secondary/50"
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{s.title}</span>
+                          <div
+                            className={cn(
+                              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors",
+                              serviceId === s._id
+                                ? "border-primary bg-primary"
+                                : "border-border"
+                            )}
+                          >
+                            {serviceId === s._id && (
+                              <CheckCircle className="w-3 h-3 text-primary-foreground" />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))
+                  )}
                 </div>
               )}
 
@@ -209,44 +212,52 @@ const Booking = () => {
                   <h3 className="font-heading font-bold text-xl mb-6">
                     Choose Your Doctor
                   </h3>
-                  {doctors.map((d) => (
-                    <button
-                      key={d.name}
-                      onClick={() => dispatch(setDoctor(d.name))}
-                      className={cn(
-                        "w-full text-left px-6 py-5 rounded-xl border-2 transition-all group",
-                        doctorId === d.name
-                          ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
-                          : "border-border hover:border-primary/40"
-                      )}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={cn(
-                            "w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-colors",
-                            doctorId === d.name
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-secondary text-muted-foreground"
-                          )}
-                        >
-                          {d.name
-                            .split(" ")
-                            .slice(1)
-                            .map((n) => n[0])
-                            .join("")}
+                  {loadingDoctors ? (
+                    <div className="space-y-4">
+                      {[1, 2].map((i) => (
+                        <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />
+                      ))}
+                    </div>
+                  ) : (
+                    doctors?.map((d: any) => (
+                      <button
+                        key={d._id}
+                        onClick={() => dispatch(setDoctor(d._id))}
+                        className={cn(
+                          "w-full text-left px-6 py-5 rounded-xl border-2 transition-all group",
+                          doctorId === d._id
+                            ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                            : "border-border hover:border-primary/40"
+                        )}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={cn(
+                              "w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-colors overflow-hidden",
+                              doctorId === d._id
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-secondary text-muted-foreground"
+                            )}
+                          >
+                            {d.image ? (
+                                <img src={d.image} alt={d.name} className="w-full h-full object-cover" />
+                            ) : (
+                                d.name.split(" ").map((n: string) => n[0]).join("")
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-heading font-semibold">{d.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {d.role}
+                            </p>
+                          </div>
+                          <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
+                            Expert
+                          </span>
                         </div>
-                        <div className="flex-1">
-                          <p className="font-heading font-semibold">{d.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {d.specialty}
-                          </p>
-                        </div>
-                        <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-                          {d.exp}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))
+                  )}
                 </div>
               )}
 
@@ -262,36 +273,47 @@ const Booking = () => {
                       onSelect={(newDate) =>
                         dispatch(
                           setDateTime({
-                            date: newDate ? newDate.toISOString() : "",
-                            timeSlot: timeSlot || "",
+                            date: newDate ? newDate.toISOString().split("T")[0] : "",
+                            timeSlot: "",
                           })
                         )
                       }
                       disabled={(d) => d < new Date() || d.getDay() === 0}
-                      className="pointer-events-auto rounded-xl"
+                      className="pointer-events-auto rounded-xl border"
                     />
                   </div>
                   {date && (
                     <div>
                       <p className="text-sm font-semibold mb-3">Available Times</p>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                        {timeSlots.map((t) => (
-                          <button
-                            key={t}
-                            onClick={() =>
-                              dispatch(setDateTime({ date, timeSlot: t }))
-                            }
-                            className={cn(
-                              "px-3 py-2.5 rounded-xl border-2 text-sm transition-all font-medium",
-                              timeSlot === t
-                                ? "border-primary bg-primary/5 text-primary shadow-sm"
-                                : "border-border hover:border-primary/40"
-                            )}
-                          >
-                            {t}
-                          </button>
-                        ))}
-                      </div>
+                      {loadingSlots ? (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                             {[1,2,3,4].map(i => (
+                                 <div key={i} className="h-10 bg-muted animate-pulse rounded-xl" />
+                             ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {availableSlots?.map((t: string) => (
+                            <button
+                              key={t}
+                              onClick={() =>
+                                dispatch(setDateTime({ date, timeSlot: t }))
+                              }
+                              className={cn(
+                                "px-3 py-2.5 rounded-xl border-2 text-sm transition-all font-medium",
+                                timeSlot === t
+                                  ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                  : "border-border hover:border-primary/40"
+                              )}
+                            >
+                              {t}
+                            </button>
+                          ))}
+                          {availableSlots?.length === 0 && (
+                              <p className="col-span-all text-sm text-muted-foreground py-4">No slots available for this date.</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -352,6 +374,22 @@ const Booking = () => {
                       )
                     }
                   />
+                   <Input
+                    placeholder="Notes (Optional)"
+                    className="rounded-xl py-5"
+                    value={patientInfo?.notes || ""}
+                    onChange={(e) =>
+                      dispatch(
+                        setPatientInfo({
+                          ...patientInfo,
+                          name: patientInfo?.name || "",
+                          email: patientInfo?.email || "",
+                          phone: patientInfo?.phone || "",
+                          notes: e.target.value,
+                        })
+                      )
+                    }
+                  />
 
                   <div className="bg-gradient-to-br from-secondary/80 to-secondary/40 rounded-2xl p-6 text-sm space-y-2 mt-6 border border-border">
                     <p className="font-heading font-bold text-base mb-3 flex items-center gap-2">
@@ -359,11 +397,11 @@ const Booking = () => {
                     </p>
                     <p>
                       <span className="text-muted-foreground">Service:</span>{" "}
-                      <span className="font-medium">{serviceId}</span>
+                      <span className="font-medium">{selectedService?.title}</span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Doctor:</span>{" "}
-                      <span className="font-medium">{doctorId}</span>
+                      <span className="font-medium">{selectedDoctor?.name}</span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Date:</span>{" "}
@@ -392,23 +430,23 @@ const Booking = () => {
                     <CheckCircle className="w-10 h-10 text-primary" />
                   </div>
                   <h3 className="font-heading font-bold text-3xl mb-3">
-                    Appointment Confirmed!
+                    Appointment Request Received!
                   </h3>
                   <p className="text-muted-foreground text-lg mb-2">
                     Thank you, {patientInfo?.name}!
                   </p>
                   <p className="text-muted-foreground">
-                    A confirmation email has been sent to{" "}
+                    Your appointment request has been sent. We will confirm it shortly via email at{" "}
                     <strong className="text-foreground">{patientInfo?.email}</strong>.
                   </p>
                   <div className="bg-secondary/50 rounded-2xl p-6 mt-8 text-sm space-y-2 max-w-sm mx-auto">
                     <p>
                       <span className="text-muted-foreground">Service:</span>{" "}
-                      <span className="font-medium">{serviceId}</span>
+                      <span className="font-medium">{selectedService?.title}</span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Doctor:</span>{" "}
-                      <span className="font-medium">{doctorId}</span>
+                      <span className="font-medium">{selectedDoctor?.name}</span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Date:</span>{" "}
@@ -428,6 +466,15 @@ const Booking = () => {
                       <span className="font-medium">{timeSlot}</span>
                     </p>
                   </div>
+                   <Button 
+                    className="mt-8 rounded-xl"
+                    onClick={() => {
+                        dispatch(resetBooking());
+                        window.location.href = "/";
+                    }}
+                   >
+                       Return Home
+                   </Button>
                 </div>
               )}
             </div>
@@ -437,7 +484,7 @@ const Booking = () => {
                 <Button
                   variant="outline"
                   onClick={handlePrev}
-                  disabled={step === 1}
+                  disabled={step === 1 || isSubmitting}
                   className="gap-2 rounded-xl"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back
@@ -452,11 +499,16 @@ const Booking = () => {
                   </Button>
                 ) : (
                   <Button
-                    disabled={!canNext()}
+                    disabled={!canNext() || isSubmitting}
                     onClick={handleNext}
                     className="gap-2 rounded-xl px-8"
                   >
-                    <CheckCircle className="w-4 h-4" /> Confirm Booking
+                    {isSubmitting ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white" />
+                    ) : (
+                        <CheckCircle className="w-4 h-4" />
+                    )}
+                    {isSubmitting ? "Processing..." : "Confirm Booking"}
                   </Button>
                 )}
               </div>

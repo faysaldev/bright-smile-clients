@@ -1,23 +1,16 @@
 import { useRef, useEffect } from "react";
-import doctorImg from "@/src/assets/doctor.jpeg";
-import { Award, GraduationCap, Stethoscope, Heart } from "lucide-react";
+import { Award } from "lucide-react";
 import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
-
-const credentials = [
-  {
-    icon: GraduationCap,
-    label: "Columbia University College of Dental Medicine",
-  },
-  { icon: Award, label: "Fellow, American Academy of Cosmetic Dentistry" },
-  { icon: Stethoscope, label: "20+ Years of Clinical Experience" },
-  { icon: Heart, label: "Active Community Volunteer" },
-];
+import { useGetAllDoctorsQuery } from "@/src/redux/features/doctors/doctorsApi";
+import { getIcon } from "@/src/utils/iconMap";
 
 const DoctorIntro = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const { data: doctors, isLoading } = useGetAllDoctorsQuery(undefined);
+  const leadDoctor = doctors?.find((d: any) => d.isLead) || doctors?.[0];
 
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || !leadDoctor) return;
     const tl = gsap.timeline({
       scrollTrigger: { trigger: ref.current, start: "top 75%" },
     });
@@ -35,7 +28,9 @@ const DoctorIntro = () => {
       tl.kill();
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, []);
+  }, [leadDoctor]);
+
+  if (isLoading || !leadDoctor) return null;
 
   return (
     <section className="section-padding bg-secondary/30">
@@ -44,8 +39,8 @@ const DoctorIntro = () => {
           <div className="doc-img relative">
             <div className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-xl" />
             <img
-              src={doctorImg.src}
-              alt="Dr. James Mitchell"
+              src={leadDoctor.image || "/doctor.jpeg"}
+              alt={leadDoctor.name}
               className="relative rounded-3xl w-full aspect-[4/5] object-cover shadow-2xl"
               loading="lazy"
               width={640}
@@ -56,32 +51,49 @@ const DoctorIntro = () => {
                 <Award className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <p className="font-heading font-bold text-sm">20+ Years</p>
-                <p className="text-xs text-muted-foreground">of Excellence</p>
+                <p className="font-heading font-bold text-sm">Expertise</p>
+                <p className="text-xs text-muted-foreground">in Dentistry</p>
               </div>
             </div>
           </div>
           <div className="doc-text">
             <span className="text-sm font-medium text-primary uppercase tracking-wider">
-              Lead Dentist
+              {leadDoctor.role}
             </span>
             <h2 className="text-3xl sm:text-4xl font-heading font-bold mt-2 mb-6">
-              Dr. James Mitchell
+              {leadDoctor.name}
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
-              With over two decades of experience, Dr. Mitchell combines
-              cutting-edge techniques with genuine compassion. His mission is
-              simple: help every patient achieve the smile they deserve.
+              {leadDoctor.bio}
             </p>
             <div className="space-y-4">
-              {credentials.map((c) => (
-                <div key={c.label} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <c.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium">{c.label}</span>
-                </div>
-              ))}
+              {(() => {
+                let experienceArray: string[] = [];
+                if (Array.isArray(leadDoctor.experience)) {
+                  experienceArray = leadDoctor.experience;
+                } else if (typeof leadDoctor.experience === "string") {
+                  try {
+                    // Try to parse if it's a JSON string
+                    const parsed = JSON.parse(leadDoctor.experience);
+                    experienceArray = Array.isArray(parsed) ? parsed : [leadDoctor.experience];
+                  } catch (e) {
+                    // If not valid JSON, treat as a single string
+                    experienceArray = [leadDoctor.experience];
+                  }
+                }
+
+                return experienceArray.map((exp: string, idx: number) => {
+                  const Icon = getIcon("Award");
+                  return (
+                    <div key={idx} className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <span className="text-sm font-medium">{exp}</span>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           </div>
         </div>

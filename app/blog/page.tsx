@@ -1,30 +1,38 @@
 "use client";
+
 import { useRef, useEffect, useState } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Search, ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
-import { blogPosts } from "@/src/data/blogPosts";
+import { useGetAllPostsQuery } from "@/src/redux/features/blog/blogApi";
 import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
-
-const categories = [
-  "All",
-  ...Array.from(new Set(blogPosts.map((p) => p.category))),
-];
 
 const Blog = () => {
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const filtered = blogPosts.filter(
-    (p) =>
-      (filter === "All" || p.category === filter) &&
-      p.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  const { data: blogPosts, isLoading } = useGetAllPostsQuery({
+    category: filter === "All" ? undefined : filter,
+    searchTerm: search || undefined,
+  });
+
+  console.log(blogPosts);
+
+  const categories = [
+    "All",
+    "Oral Health",
+    "Procedures",
+    "Cosmetic",
+    "Pediatric",
+    "Patient Care",
+  ];
+
+  const posts = blogPosts?.posts || [];
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (!gridRef.current) return;
+    if (!gridRef.current || isLoading) return;
     gsap.fromTo(
       gridRef.current.querySelectorAll(".blog-card"),
       { y: 40, opacity: 0 },
@@ -38,7 +46,38 @@ const Blog = () => {
       },
     );
     return () => ScrollTrigger.getAll().forEach((t) => t.kill());
-  }, []);
+  }, [isLoading, blogPosts, posts]);
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Recent";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="pb-16 pt-8">
+        <section className="section-padding bg-gradient-to-b from-secondary/50 to-background">
+          <div className="container-narrow text-center animate-pulse">
+            <div className="h-6 w-20 bg-muted mx-auto rounded mb-4" />
+            <div className="h-12 w-64 bg-muted mx-auto rounded" />
+          </div>
+        </section>
+        <section className="section-padding">
+          <div className="container-narrow">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-80 bg-muted rounded-2xl" />
+              ))}
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -82,29 +121,32 @@ const Blog = () => {
               </div>
             </div>
 
-            {/* Featured post */}
-            {filter === "All" && !search && (
+            {posts.length > 0 && filter === "All" && !search && (
               <Link
-                href={`/blog/${blogPosts[0].slug}`}
+                href={`/blog/${posts[0].slug}`}
                 className="block mb-10 glass-card rounded-3xl overflow-hidden group hover:shadow-xl transition-shadow"
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2">
-                  <div className="h-64 lg:h-auto bg-gradient-to-br from-primary/30 to-accent/30" />
+                  <div
+                    className="h-64 lg:h-auto bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${posts[0].image || "/blog-placeholder.png"})`,
+                    }}
+                  />
                   <div className="p-8 lg:p-12 flex flex-col justify-center">
                     <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full w-fit mb-4">
-                      {blogPosts[0].category}
+                      {posts[0].category}
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-heading font-bold mb-3 group-hover:text-primary transition-colors">
-                      {blogPosts[0].title}
+                      {posts[0].title}
                     </h2>
-                    <p className="text-muted-foreground leading-relaxed mb-4">
-                      {blogPosts[0].excerpt}
+                    <p className="text-muted-foreground leading-relaxed mb-4 line-clamp-3">
+                      {posts[0].excerpt}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{blogPosts[0].date}</span>
+                      <span>{formatDate(posts[0].publishDate)}</span>
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />{" "}
-                        {blogPosts[0].readTime}
+                        <Clock className="w-3.5 h-3.5" /> {posts[0].readTime}
                       </span>
                     </div>
                   </div>
@@ -116,13 +158,18 @@ const Blog = () => {
               ref={gridRef}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {filtered.map((p) => (
+              {posts.map((p: any) => (
                 <Link
                   href={`/blog/${p.slug}`}
                   key={p.slug}
                   className="blog-card glass-card rounded-2xl overflow-hidden group hover:scale-[1.02] hover:shadow-xl transition-all"
                 >
-                  <div className="h-44 bg-gradient-to-br from-primary/20 to-accent/20 relative overflow-hidden">
+                  <div
+                    className="h-44 bg-cover bg-center relative"
+                    style={{
+                      backgroundImage: `url(${p.image || "/blog-placeholder.png"})`,
+                    }}
+                  >
                     <div className="absolute inset-0 bg-gradient-to-t from-card/60 to-transparent" />
                   </div>
                   <div className="p-6">
@@ -141,7 +188,9 @@ const Blog = () => {
                       {p.excerpt}
                     </p>
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">{p.date}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(p.publishDate)}
+                      </p>
                       <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         Read <ArrowRight className="w-3 h-3" />
                       </span>
@@ -150,6 +199,13 @@ const Blog = () => {
                 </Link>
               ))}
             </div>
+            {posts.length === 0 && (
+              <div className="text-center py-20">
+                <p className="text-muted-foreground text-lg">
+                  No articles found matching your criteria.
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </div>

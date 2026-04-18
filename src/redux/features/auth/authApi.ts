@@ -8,7 +8,41 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userInfo,
       }),
+      transformResponse: (response: any) => response.data,
       invalidatesTags: ["User"],
+    }),
+    logout: builder.mutation({
+      query: () => ({
+        url: "/auth/logout",
+        method: "POST",
+      }),
+      transformResponse: (response: any) => response.data,
+      invalidatesTags: ["User"],
+    }),
+    getMe: builder.query({
+      query: () => ({
+        url: "/users/me",
+        method: "GET",
+      }),
+      transformResponse: (response: any) => response.data,
+      providesTags: ["User"],
+    }),
+    updateMe: builder.mutation({
+      query: (data) => ({
+        url: "/users/me",
+        method: "PUT",
+        body: data,
+      }),
+      transformResponse: (response: any) => response.data,
+      invalidatesTags: ["User"],
+    }),
+    changePassword: builder.mutation({
+      query: (data) => ({
+        url: "/users/me/change-password",
+        method: "POST",
+        body: data,
+      }),
+      transformResponse: (response: any) => response.data,
     }),
     register: builder.mutation({
       query: (userInfo) => ({
@@ -16,6 +50,7 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: userInfo,
       }),
+      transformResponse: (response: any) => response.data,
       invalidatesTags: ["User"],
     }),
     forgetPassword: builder.mutation({
@@ -24,54 +59,27 @@ const authApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      transformResponse: (response: any) => response.data,
     }),
     resetPassword: builder.mutation({
       query: (data) => ({
-        url: `/auth/reset-password`,
+        url: "/auth/reset-password",
         method: "POST",
         body: data,
       }),
+      transformResponse: (response: any) => response.data,
       invalidatesTags: ["User"],
-    }),
-    changePassword: builder.mutation({
-      query: (data) => ({
-        url: `/users/me/change-password`,
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["User"],
-    }),
-    verifyEmail: builder.mutation({
-      query: (data) => ({
-        url: `/auth/verify-email`,
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["User"],
-    }),
-    resendVerification: builder.mutation({
-      query: ({ email }) => ({
-        url: `/auth/resend-verification`,
-        method: "POST",
-        body: { email },
-      }),
-    }),
-    checkUserExist: builder.mutation({
-      query: ({ email }) => ({
-        url: `/auth//check-user/${email}`,
-        method: "GET",
-      }),
     }),
   }),
 });
 
 export const {
   useLoginMutation,
+  useLogoutMutation,
+  useGetMeQuery,
+  useUpdateMeMutation,
+  useChangePasswordMutation,
   useRegisterMutation,
   useForgetPasswordMutation,
   useResetPasswordMutation,
-  useChangePasswordMutation,
-  useVerifyEmailMutation,
-  useResendVerificationMutation,
-  useCheckUserExistMutation,
 } = authApi;
