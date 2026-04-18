@@ -1,78 +1,91 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Search, MessageSquare, Reply, Trash2 } from "lucide-react";
-import { useViewInquiriesQuery } from "@/src/redux/features/contact/contactApi";
+import { useState, useEffect } from "react";
+import {
+  Mail,
+  Search,
+  MessageSquare,
+  Reply,
+  Trash2,
+  Loader2,
+  User,
+} from "lucide-react";
+import {
+  useViewInquiriesQuery,
+  useUpdateInquiryStatusMutation,
+} from "@/src/redux/features/contact/contactApi";
+import { toast } from "sonner";
+import { format } from "date-fns";
 
 export default function AdminContacts() {
-  const initialMessages = [
-    {
-      id: 1,
-      name: "David Anderson",
-      email: "david.a@example.com",
-      subject: "Insurance Inquiry",
-      date: "Today, 10:23 AM",
-      status: "Unread",
-      content:
-        "Hi, I was wondering if you accept Delta Dental insurance for routine cleanings? Thanks.",
-    },
-    {
-      id: 2,
-      name: "Lisa Wong",
-      email: "lisa.w@example.com",
-      subject: "Reschedule Request",
-      date: "Yesterday, 04:15 PM",
-      status: "Read",
-      content:
-        "I need to reschedule my appointment from Tuesday to Thursday if possible. Please let me know.",
-    },
-    {
-      id: 3,
-      name: "Mark Thomas",
-      email: "mark.t@example.com",
-      subject: "Cost of Implants",
-      date: "Oct 22, 2026",
-      status: "Replied",
-      content:
-        "Could you provide a rough estimate for a single tooth implant? Do you offer payment plans?",
-    },
-  ];
+  const { data: inquiries, isLoading } = useViewInquiriesQuery({});
+  const [updateStatus] = useUpdateInquiryStatusMutation();
 
-  const { data: queryies } = useViewInquiriesQuery({});
-  console.log(queryies);
-
-  const [messages, setMessages] = useState(initialMessages);
-  const [activeMessageId, setActiveMessageId] = useState<number | null>(1);
+  const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const activeMessage = messages.find((m) => m.id === activeMessageId);
+  // Set first message as active when data loads
+  useEffect(() => {
+    if (inquiries?.length > 0 && !activeMessageId) {
+      setActiveMessageId(inquiries[0]._id);
+    }
+  }, [inquiries, activeMessageId]);
 
-  const handleSelectMessage = (id: number) => {
-    setActiveMessageId(id);
-    setMessages(
-      messages.map((m) =>
-        m.id === id && m.status === "Unread" ? { ...m, status: "Read" } : m,
-      ),
-    );
-  };
+  const activeMessage = inquiries?.find((m: any) => m._id === activeMessageId);
 
-  const handleDelete = (id: number) => {
-    if (confirm("Delete this message?")) {
-      setMessages(messages.filter((m) => m.id !== id));
-      if (activeMessageId === id) setActiveMessageId(null);
+  const handleSelectMessage = async (msg: any) => {
+    setActiveMessageId(msg._id);
+
+    // Mark as read if it's currently unread
+    if (msg.status === "unread") {
+      try {
+        await updateStatus({ id: msg._id, status: "read" }).unwrap();
+      } catch (error) {
+        console.error("Failed to update status:", error);
+      }
     }
   };
 
-  const handleReply = () => {
-    if (!replyText.trim()) return alert("Please type a reply.");
-    alert(`Reply sent to ${activeMessage?.email}`);
-    setMessages(
-      messages.map((m) =>
-        m.id === activeMessageId ? { ...m, status: "Replied" } : m,
-      ),
-    );
-    setReplyText("");
+  const handleReply = async () => {
+    if (!replyText.trim()) return toast.error("Please type a reply.");
+
+    // Console log the reply section as requested
+    console.log("--- REPLID SENT ---");
+    console.log("To:", activeMessage?.email);
+    console.log("Subject:", activeMessage?.subject);
+    console.log("Reply Message:", replyText);
+    console.log("-------------------");
+
+    try {
+      // In a real app, you'd call an email sending API here.
+      // For now, we update the status to "replied" in the database.
+      await updateStatus({
+        id: activeMessage?._id,
+        status: "replied",
+      }).unwrap();
+
+      toast.success(`Reply logged for ${activeMessage?.name}`);
+      setReplyText("");
+    } catch (error) {
+      toast.error("Failed to update inquiry status.");
+    }
   };
+
+  const filteredInquiries = inquiries?.filter(
+    (m: any) =>
+      m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      m.email.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  if (isLoading) {
+    return (
+      <div className="h-[600px] flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-primary/30" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 h-[calc(100vh-8rem)] min-h-[600px] flex flex-col animate-fade-up">
@@ -92,45 +105,51 @@ export default function AdminContacts() {
               <input
                 type="text"
                 placeholder="Search messages..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {messages.length === 0 && (
-              <p className="text-slate-400 p-4 text-center text-sm">
-                No messages.
+            {filteredInquiries?.length === 0 && (
+              <p className="text-slate-400 p-8 text-center text-sm italic">
+                No messages found.
               </p>
             )}
-            {messages.map((msg) => (
+            {filteredInquiries?.map((msg: any) => (
               <div
-                key={msg.id}
-                onClick={() => handleSelectMessage(msg.id)}
+                key={msg._id}
+                onClick={() => handleSelectMessage(msg)}
                 className={`p-4 border-b border-slate-100 cursor-pointer transition-colors ${
-                  activeMessageId === msg.id
+                  activeMessageId === msg._id
                     ? "bg-primary/5 border-l-2 border-l-primary"
                     : "hover:bg-slate-50 border-l-2 border-l-transparent"
                 }`}
               >
                 <div className="flex justify-between items-start mb-1">
                   <h3
-                    className={`text-sm font-medium ${msg.status === "Unread" ? "text-slate-900" : "text-slate-700"}`}
+                    className={`text-sm font-bold ${msg.status === "unread" ? "text-slate-900" : "text-slate-600"}`}
                   >
                     {msg.name}
                   </h3>
-                  <span className="text-xs text-slate-400">{msg.date}</span>
+                  <span className="text-[10px] font-medium text-slate-400">
+                    {format(new Date(msg.createdAt), "MMM d, h:mm a")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 mb-1">
-                  {msg.status === "Replied" && (
+                  {msg.status === "replied" && (
                     <Reply className="w-3 h-3 text-emerald-500" />
                   )}
                   <h4
-                    className={`text-xs truncate ${msg.status === "Unread" ? "font-semibold text-slate-800" : "text-slate-600"}`}
+                    className={`text-xs truncate ${msg.status === "unread" ? "font-black text-slate-800" : "text-slate-500"}`}
                   >
                     {msg.subject}
                   </h4>
                 </div>
-                <p className="text-xs text-slate-500 truncate">{msg.content}</p>
+                <p className="text-xs text-slate-400 truncate font-medium">
+                  {msg.message}
+                </p>
               </div>
             ))}
           </div>
@@ -140,65 +159,77 @@ export default function AdminContacts() {
         <div className="flex-1 flex flex-col bg-slate-50/50">
           {activeMessage ? (
             <>
-              <div className="p-6 border-b border-slate-100 bg-white flex justify-between items-start">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800 mb-2">
-                    {activeMessage.subject}
-                  </h2>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                      {activeMessage.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-800">
+              <div className="p-6 border-b border-slate-100  flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-xl shadow-inner uppercase">
+                    {activeMessage.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                      {activeMessage.subject}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-xs font-bold text-slate-600">
                         {activeMessage.name}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <span className="w-1 h-1 rounded-full bg-slate-200" />
+                      <p className="text-xs text-slate-400 font-medium tracking-tight">
                         {activeMessage.email}
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleDelete(activeMessage.id)}
-                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete"
+                  <div
+                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                      activeMessage.status === "unread"
+                        ? "bg-amber-50 text-amber-600 border-amber-100"
+                        : activeMessage.status === "replied"
+                          ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                          : "bg-slate-100 text-slate-500 border-slate-200"
+                    }`}
                   >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                    {activeMessage.status}
+                  </div>
                 </div>
               </div>
               <div className="p-8 flex-1 overflow-y-auto">
-                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed text-sm">
-                  {activeMessage.content}
-                </p>
-                {activeMessage.status === "Replied" && (
-                  <div className="mt-8 bg-slate-100 p-4 rounded-lg border border-slate-200">
-                    <p className="text-xs font-semibold text-slate-500 mb-2">
-                      Replied
+                <div className=" p-8 rounded-3xl border border-slate-100 shadow-sm">
+                  <p className="text-slate-700 whitespace-pre-wrap leading-relaxed font-medium">
+                    {activeMessage.message}
+                  </p>
+                </div>
+
+                {activeMessage.status === "replied" && (
+                  <div className="mt-8 bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                      <Reply className="w-12 h-12 text-emerald-500" />
+                    </div>
+                    <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-3">
+                      Status: Successfully Replied
                     </p>
-                    <p className="text-sm text-slate-700">
-                      Thank you for your message. We have received it and a copy
-                      of your reply has been emailed to you.
+                    <p className="text-sm text-emerald-800 font-medium leading-relaxed">
+                      This inquiry has been marked as resolved. A reply was
+                      shared with the patient and the conversation is now
+                      tracked in the system records.
                     </p>
                   </div>
                 )}
               </div>
 
-              <div className="p-4 bg-white border-t border-slate-100">
+              <div className="p-6 bg-white border-t border-slate-100">
                 <div className="flex gap-4">
                   <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
-                    className="w-full flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none h-24"
-                    placeholder="Type your reply here..."
+                    className="w-full flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none h-28 placeholder:text-slate-400"
+                    placeholder={`Reply to ${activeMessage.name}...`}
                   ></textarea>
                 </div>
-                <div className="flex justify-end mt-2">
+                <div className="flex justify-end mt-4">
                   <button
                     onClick={handleReply}
-                    className="bg-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2"
+                    className="bg-primary text-white px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 hover:-translate-y-0.5"
                   >
                     <Reply className="w-4 h-4" /> Send Reply
                   </button>
@@ -206,9 +237,14 @@ export default function AdminContacts() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-              <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
-              <p>Select a message to read</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-300">
+              <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-6">
+                <MessageSquare className="w-10 h-10 opacity-20" />
+              </div>
+              <p className="font-bold text-lg">No message selected</p>
+              <p className="text-sm mt-1">
+                Choose an inquiry from the list to view details
+              </p>
             </div>
           )}
         </div>

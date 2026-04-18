@@ -45,6 +45,13 @@ export default function AdminBlog() {
     },
   ];
 
+  // const { data: blogPosts, isLoading } = useGetAllPostsQuery({
+  //   category: filter === "All" ? undefined : filter,
+  //   searchTerm: search || undefined,
+  // });
+
+  // console.log(blogPosts);
+
   const [posts, setPosts] = useState(initialPosts);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<any>(null);
