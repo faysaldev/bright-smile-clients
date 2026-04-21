@@ -33,6 +33,14 @@ import {
   useCreateAppointmentMutation,
 } from "@/src/redux/features/appointments/appointmentsApi";
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
+
+const BookingDownloadButton = dynamic(
+  () => import("@/src/components/booking/BookingDownloadButton"),
+  { ssr: false },
+);
+
+
 
 const stepsConfig = [
   { label: "Service", icon: CalendarCheck },
@@ -631,6 +639,28 @@ const Booking = () => {
                   >
                     Return Home
                   </Button>
+
+                  <div className="mt-4">
+                    <BookingDownloadButton
+                      data={{
+                        patientName: patientInfo?.name || "",
+                        patientEmail: patientInfo?.email || "",
+                        patientPhone: patientInfo?.phone || "",
+                        service: selectedService?.title || "",
+                        doctor: selectedDoctor?.name || "",
+                        date: date
+                          ? new Date(date).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })
+                          : "",
+                        time: timeSlot || "",
+                      }}
+                    />
+                  </div>
+
                 </div>
               )}
             </div>
