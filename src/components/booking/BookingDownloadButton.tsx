@@ -30,7 +30,7 @@ const BookingDownloadButton = ({ data }: BookingDownloadButtonProps) => {
           disabled={loading}
         >
           <Download className="w-4 h-4" />
-          {loading ? "Preparing PDF..." : "Download Appointment PDF"}
+          {loading ? "Preparing..." : "Appointment"}
         </Button>
       )}
     </PDFDownloadLink>
