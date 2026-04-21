@@ -38,6 +38,14 @@ const appointmentsApi = baseApi.injectEndpoints({
       transformResponse: (response: any) => response.data,
       invalidatesTags: ["Appointment"],
     }),
+    deleteAppointment: builder.mutation({
+      query: ({ id }) => ({
+        url: `/appointments/${id}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: any) => response.data,
+      invalidatesTags: ["Appointment"],
+    }),
   }),
 });
 
@@ -46,4 +54,5 @@ export const {
   useCreateAppointmentMutation,
   useGetAllAppointmentsQuery,
   useUpdateAppointmentStatusMutation,
+  useDeleteAppointmentMutation,
 } = appointmentsApi;
