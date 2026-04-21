@@ -43,26 +43,32 @@ const stepsConfig = [
 
 const Booking = () => {
   const dispatch = useDispatch();
-  const { step, serviceId, doctorId, date, timeSlot, patientInfo } = useSelector(
-    (state: RootState) => state.booking
-  );
+  const { step, serviceId, doctorId, date, timeSlot, patientInfo } =
+    useSelector((state: RootState) => state.booking);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
   // API Hooks
-  const { data: services, isLoading: loadingServices } = useGetAllServicesQuery(undefined);
-  const { data: doctors, isLoading: loadingDoctors } = useGetAllDoctorsQuery(undefined);
-  const { data: availableSlots, isFetching: loadingSlots } = useCheckAvailabilityQuery(
-    { doctor_id: doctorId!, date: date! },
-    { skip: !doctorId || !date }
-  );
-  const [createAppointment, { isLoading: isSubmitting }] = useCreateAppointmentMutation();
+  const { data: services, isLoading: loadingServices } =
+    useGetAllServicesQuery(undefined);
+  const { data: doctors, isLoading: loadingDoctors } =
+    useGetAllDoctorsQuery(undefined);
+  const { data: availableSlots, isFetching: loadingSlots } =
+    useCheckAvailabilityQuery(
+      { doctorId: doctorId!, date: date! },
+      { skip: !doctorId || !date },
+    );
+  const [createAppointment, { isLoading: isSubmitting }] =
+    useCreateAppointmentMutation();
 
   const canNext = () => {
     if (step === 1) return !!serviceId;
     if (step === 2) return !!doctorId;
     if (step === 3) return !!date && !!timeSlot;
-    if (step === 4) return !!patientInfo?.name && !!patientInfo?.email && !!patientInfo?.phone;
+    if (step === 4)
+      return (
+        !!patientInfo?.name && !!patientInfo?.email && !!patientInfo?.phone
+      );
     return false;
   };
 
@@ -72,7 +78,7 @@ const Booking = () => {
     gsap.fromTo(
       contentRef.current,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
+      { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
     );
   }, [step]);
 
@@ -84,14 +90,17 @@ const Booking = () => {
     if (step === 4) {
       try {
         await createAppointment({
-          doctor_id: doctorId!,
-          service_id: serviceId!,
-          appointment_date: date!,
-          appointment_time: timeSlot!,
-          patient_name: patientInfo!.name,
-          patient_email: patientInfo!.email,
-          patient_phone: patientInfo!.phone,
-          notes: patientInfo!.notes,
+          serviceId: serviceId!,
+          doctorId: doctorId!,
+          date: date!,
+          timeSlot: timeSlot!,
+          patientInfo: {
+            name: patientInfo!.name,
+            email: patientInfo!.email,
+            phone: patientInfo!.phone,
+            isNewPatient: patientInfo!.isNewPatient,
+            notes: patientInfo!.notes,
+          },
         }).unwrap();
         dispatch(setNextStep());
         toast.success("Appointment booked successfully!");
@@ -136,8 +145,8 @@ const Booking = () => {
                     i + 1 < step
                       ? "bg-primary text-primary-foreground scale-90"
                       : i + 1 === step
-                      ? "bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/30"
-                      : "bg-secondary text-muted-foreground"
+                        ? "bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/30"
+                        : "bg-secondary text-muted-foreground",
                   )}
                 >
                   {i + 1 < step ? (
@@ -153,7 +162,7 @@ const Booking = () => {
                   <div
                     className={cn(
                       "w-8 sm:w-16 h-0.5 mx-2 transition-colors duration-500",
-                      i + 1 < step ? "bg-primary" : "bg-border"
+                      i + 1 < step ? "bg-primary" : "bg-border",
                     )}
                   />
                 )}
@@ -171,7 +180,10 @@ const Booking = () => {
                   {loadingServices ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-14 bg-muted animate-pulse rounded-xl" />
+                        <div
+                          key={i}
+                          className="h-14 bg-muted animate-pulse rounded-xl"
+                        />
                       ))}
                     </div>
                   ) : (
@@ -183,7 +195,7 @@ const Booking = () => {
                           "w-full text-left px-6 py-4 rounded-xl border-2 transition-all text-sm font-medium group",
                           serviceId === s._id
                             ? "border-primary bg-primary/5 text-primary shadow-md shadow-primary/10"
-                            : "border-border hover:border-primary/40 hover:bg-secondary/50"
+                            : "border-border hover:border-primary/40 hover:bg-secondary/50",
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -193,7 +205,7 @@ const Booking = () => {
                               "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors",
                               serviceId === s._id
                                 ? "border-primary bg-primary"
-                                : "border-border"
+                                : "border-border",
                             )}
                           >
                             {serviceId === s._id && (
@@ -215,7 +227,10 @@ const Booking = () => {
                   {loadingDoctors ? (
                     <div className="space-y-4">
                       {[1, 2].map((i) => (
-                        <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />
+                        <div
+                          key={i}
+                          className="h-20 bg-muted animate-pulse rounded-xl"
+                        />
                       ))}
                     </div>
                   ) : (
@@ -227,7 +242,7 @@ const Booking = () => {
                           "w-full text-left px-6 py-5 rounded-xl border-2 transition-all group",
                           doctorId === d._id
                             ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
-                            : "border-border hover:border-primary/40"
+                            : "border-border hover:border-primary/40",
                         )}
                       >
                         <div className="flex items-center gap-4">
@@ -236,17 +251,26 @@ const Booking = () => {
                               "w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-colors overflow-hidden",
                               doctorId === d._id
                                 ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-muted-foreground"
+                                : "bg-secondary text-muted-foreground",
                             )}
                           >
                             {d.image ? (
-                                <img src={d.image} alt={d.name} className="w-full h-full object-cover" />
+                              <img
+                                src={d.image}
+                                alt={d.name}
+                                className="w-full h-full object-cover"
+                              />
                             ) : (
-                                d.name.split(" ").map((n: string) => n[0]).join("")
+                              d.name
+                                .split(" ")
+                                .map((n: string) => n[0])
+                                .join("")
                             )}
                           </div>
                           <div className="flex-1">
-                            <p className="font-heading font-semibold">{d.name}</p>
+                            <p className="font-heading font-semibold">
+                              {d.name}
+                            </p>
                             <p className="text-sm text-muted-foreground">
                               {d.role}
                             </p>
@@ -273,9 +297,11 @@ const Booking = () => {
                       onSelect={(newDate) =>
                         dispatch(
                           setDateTime({
-                            date: newDate ? newDate.toISOString().split("T")[0] : "",
+                            date: newDate
+                              ? newDate.toISOString().split("T")[0]
+                              : "",
                             timeSlot: "",
-                          })
+                          }),
                         )
                       }
                       disabled={(d) => d < new Date() || d.getDay() === 0}
@@ -284,33 +310,127 @@ const Booking = () => {
                   </div>
                   {date && (
                     <div>
-                      <p className="text-sm font-semibold mb-3">Available Times</p>
+                      <p className="text-sm font-semibold mb-3">
+                        Available Times
+                      </p>
                       {loadingSlots ? (
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                             {[1,2,3,4].map(i => (
-                                 <div key={i} className="h-10 bg-muted animate-pulse rounded-xl" />
-                             ))}
+                          {[1, 2, 3, 4].map((i) => (
+                            <div
+                              key={i}
+                              className="h-10 bg-muted animate-pulse rounded-xl"
+                            />
+                          ))}
                         </div>
                       ) : (
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                          {availableSlots?.map((t: string) => (
-                            <button
-                              key={t}
-                              onClick={() =>
-                                dispatch(setDateTime({ date, timeSlot: t }))
-                              }
-                              className={cn(
-                                "px-3 py-2.5 rounded-xl border-2 text-sm transition-all font-medium",
-                                timeSlot === t
-                                  ? "border-primary bg-primary/5 text-primary shadow-sm"
-                                  : "border-border hover:border-primary/40"
-                              )}
-                            >
-                              {t}
-                            </button>
-                          ))}
-                          {availableSlots?.length === 0 && (
-                              <p className="col-span-all text-sm text-muted-foreground py-4">No slots available for this date.</p>
+                        <div className="space-y-6">
+                          {/* Morning Slots */}
+                          {availableSlots?.allSlots?.some((t: string) =>
+                            t.includes("AM"),
+                          ) && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3 text-slate-500">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span className="text-[11px] font-bold uppercase tracking-wider">
+                                  Morning Sessions
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                {availableSlots.allSlots
+                                  .filter((t: string) => t.includes("AM"))
+                                  .map((t: string) => {
+                                    const isBooked =
+                                      availableSlots.bookedSlots?.includes(t);
+                                    return (
+                                      <button
+                                        key={t}
+                                        disabled={isBooked}
+                                        onClick={() =>
+                                          dispatch(
+                                            setDateTime({ date, timeSlot: t }),
+                                          )
+                                        }
+                                        className={cn(
+                                          "px-3 py-2.5 rounded-xl border-2 text-xs transition-all font-semibold relative overflow-hidden",
+                                          timeSlot === t
+                                            ? "border-primary bg-primary/5 text-primary shadow-md shadow-primary/10"
+                                            : isBooked
+                                              ? "border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed opacity-60"
+                                              : "border-border hover:border-primary/40 hover:bg-secondary/50",
+                                        )}
+                                      >
+                                        {t}
+                                        {isBooked && (
+                                          <div className="absolute inset-0 flex items-center justify-center bg-slate-50/10 backdrop-blur-[0.5px]">
+                                            <span className="text-[8px] bg-slate-200 text-slate-500 px-1 rounded-sm">
+                                              FULL
+                                            </span>
+                                          </div>
+                                        )}
+                                      </button>
+                                    );
+                                  })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Afternoon Slots */}
+                          {availableSlots?.allSlots?.some((t: string) =>
+                            t.includes("PM"),
+                          ) && (
+                            <div>
+                              <div className="flex items-center gap-2 mb-3 text-slate-500">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span className="text-[11px] font-bold uppercase tracking-wider">
+                                  Afternoon Sessions
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                {availableSlots.allSlots
+                                  .filter((t: string) => t.includes("PM"))
+                                  .map((t: string) => {
+                                    const isBooked =
+                                      availableSlots.bookedSlots?.includes(t);
+                                    return (
+                                      <button
+                                        key={t}
+                                        disabled={isBooked}
+                                        onClick={() =>
+                                          dispatch(
+                                            setDateTime({ date, timeSlot: t }),
+                                          )
+                                        }
+                                        className={cn(
+                                          "px-3 py-2.5 rounded-xl border-2 text-xs transition-all font-semibold relative overflow-hidden",
+                                          timeSlot === t
+                                            ? "border-primary bg-primary/5 text-primary shadow-md shadow-primary/10"
+                                            : isBooked
+                                              ? "border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed opacity-60"
+                                              : "border-border hover:border-primary/40 hover:bg-secondary/50",
+                                        )}
+                                      >
+                                        {t}
+                                        {isBooked && (
+                                          <div className="absolute inset-0 flex items-center justify-center bg-slate-50/10 backdrop-blur-[0.5px]">
+                                            <span className="text-[8px] bg-slate-200 text-slate-500 px-1 rounded-sm">
+                                              FULL
+                                            </span>
+                                          </div>
+                                        )}
+                                      </button>
+                                    );
+                                  })}
+                              </div>
+                            </div>
+                          )}
+
+                          {(!availableSlots?.allSlots ||
+                            availableSlots.allSlots.length === 0) && (
+                            <div className="py-10 text-center bg-secondary/30 rounded-2xl border border-dashed border-border">
+                              <p className="text-sm text-muted-foreground">
+                                No appointments available for this date.
+                              </p>
+                            </div>
                           )}
                         </div>
                       )}
@@ -331,12 +451,9 @@ const Booking = () => {
                     onChange={(e) =>
                       dispatch(
                         setPatientInfo({
-                          ...patientInfo,
+                          ...patientInfo!,
                           name: e.target.value,
-                          email: patientInfo?.email || "",
-                          phone: patientInfo?.phone || "",
-                          notes: patientInfo?.notes || "",
-                        })
+                        }),
                       )
                     }
                   />
@@ -348,12 +465,9 @@ const Booking = () => {
                     onChange={(e) =>
                       dispatch(
                         setPatientInfo({
-                          ...patientInfo,
-                          name: patientInfo?.name || "",
+                          ...patientInfo!,
                           email: e.target.value,
-                          phone: patientInfo?.phone || "",
-                          notes: patientInfo?.notes || "",
-                        })
+                        }),
                       )
                     }
                   />
@@ -365,43 +479,77 @@ const Booking = () => {
                     onChange={(e) =>
                       dispatch(
                         setPatientInfo({
-                          ...patientInfo,
-                          name: patientInfo?.name || "",
-                          email: patientInfo?.email || "",
+                          ...patientInfo!,
                           phone: e.target.value,
-                          notes: patientInfo?.notes || "",
-                        })
+                        }),
                       )
                     }
                   />
-                   <Input
+                  <div
+                    onClick={() =>
+                      dispatch(
+                        setPatientInfo({
+                          ...patientInfo!,
+                          isNewPatient: !patientInfo?.isNewPatient,
+                        }),
+                      )
+                    }
+                    className={cn(
+                      "flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all",
+                      patientInfo?.isNewPatient
+                        ? "border-primary bg-primary/5"
+                        : "border-border",
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={cn(
+                          "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
+                          patientInfo?.isNewPatient
+                            ? "border-primary bg-primary"
+                            : "border-slate-300",
+                        )}
+                      >
+                        {patientInfo?.isNewPatient && (
+                          <CheckCircle className="w-3.5 h-3.5 text-white" />
+                        )}
+                      </div>
+                      <span className="text-sm font-semibold">
+                        I am a new patient
+                      </span>
+                    </div>
+                  </div>
+
+                  <Input
                     placeholder="Notes (Optional)"
                     className="rounded-xl py-5"
                     value={patientInfo?.notes || ""}
                     onChange={(e) =>
                       dispatch(
                         setPatientInfo({
-                          ...patientInfo,
-                          name: patientInfo?.name || "",
-                          email: patientInfo?.email || "",
-                          phone: patientInfo?.phone || "",
+                          ...patientInfo!,
                           notes: e.target.value,
-                        })
+                        }),
                       )
                     }
                   />
 
                   <div className="bg-gradient-to-br from-secondary/80 to-secondary/40 rounded-2xl p-6 text-sm space-y-2 mt-6 border border-border">
                     <p className="font-heading font-bold text-base mb-3 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" /> Appointment Summary
+                      <Sparkles className="w-4 h-4 text-primary" /> Appointment
+                      Summary
                     </p>
                     <p>
                       <span className="text-muted-foreground">Service:</span>{" "}
-                      <span className="font-medium">{selectedService?.title}</span>
+                      <span className="font-medium">
+                        {selectedService?.title}
+                      </span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Doctor:</span>{" "}
-                      <span className="font-medium">{selectedDoctor?.name}</span>
+                      <span className="font-medium">
+                        {selectedDoctor?.name}
+                      </span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Date:</span>{" "}
@@ -436,17 +584,25 @@ const Booking = () => {
                     Thank you, {patientInfo?.name}!
                   </p>
                   <p className="text-muted-foreground">
-                    Your appointment request has been sent. We will confirm it shortly via email at{" "}
-                    <strong className="text-foreground">{patientInfo?.email}</strong>.
+                    Your appointment request has been sent. We will confirm it
+                    shortly via email at{" "}
+                    <strong className="text-foreground">
+                      {patientInfo?.email}
+                    </strong>
+                    .
                   </p>
                   <div className="bg-secondary/50 rounded-2xl p-6 mt-8 text-sm space-y-2 max-w-sm mx-auto">
                     <p>
                       <span className="text-muted-foreground">Service:</span>{" "}
-                      <span className="font-medium">{selectedService?.title}</span>
+                      <span className="font-medium">
+                        {selectedService?.title}
+                      </span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Doctor:</span>{" "}
-                      <span className="font-medium">{selectedDoctor?.name}</span>
+                      <span className="font-medium">
+                        {selectedDoctor?.name}
+                      </span>
                     </p>
                     <p>
                       <span className="text-muted-foreground">Date:</span>{" "}
@@ -466,15 +622,15 @@ const Booking = () => {
                       <span className="font-medium">{timeSlot}</span>
                     </p>
                   </div>
-                   <Button 
+                  <Button
                     className="mt-8 rounded-xl"
                     onClick={() => {
-                        dispatch(resetBooking());
-                        window.location.href = "/";
+                      dispatch(resetBooking());
+                      window.location.href = "/";
                     }}
-                   >
-                       Return Home
-                   </Button>
+                  >
+                    Return Home
+                  </Button>
                 </div>
               )}
             </div>
@@ -504,9 +660,9 @@ const Booking = () => {
                     className="gap-2 rounded-xl px-8"
                   >
                     {isSubmitting ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white" />
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white" />
                     ) : (
-                        <CheckCircle className="w-4 h-4" />
+                      <CheckCircle className="w-4 h-4" />
                     )}
                     {isSubmitting ? "Processing..." : "Confirm Booking"}
                   </Button>

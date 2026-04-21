@@ -10,6 +10,7 @@ interface BookingState {
     name: string;
     email: string;
     phone: string;
+    isNewPatient: boolean;
     notes: string;
   } | null;
 }
@@ -20,7 +21,13 @@ const initialState: BookingState = {
   doctorId: null,
   date: null,
   timeSlot: null,
-  patientInfo: null,
+  patientInfo: {
+    name: "",
+    email: "",
+    phone: "",
+    isNewPatient: true,
+    notes: "",
+  },
 };
 
 const bookingSlice = createSlice({

@@ -4,45 +4,6 @@ import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
 import { useGetTestimonialsQuery } from "@/src/redux/features/testimonials/testimonialsApi";
 import { Button } from "../ui/button";
 
-const testimonials = [
-  {
-    name: "Sarah Johnson",
-    role: "Patient since 2019",
-    text: "BrightSmile completely transformed my dental experience. The team is incredibly gentle and professional. I actually look forward to my visits now!",
-    rating: 5,
-  },
-  {
-    name: "Michael Chen",
-    role: "Patient since 2020",
-    text: "After years of dental anxiety, I finally found a practice that makes me feel comfortable. Dr. Mitchell is exceptional — truly world-class care.",
-    rating: 5,
-  },
-  {
-    name: "Emily Rodriguez",
-    role: "Patient since 2021",
-    text: "The teeth whitening results were amazing! My smile has never looked better. The staff went above and beyond to make sure I was happy.",
-    rating: 5,
-  },
-  {
-    name: "David Thompson",
-    role: "Patient since 2018",
-    text: "From implants to routine cleaning, every visit has been a wonderful experience. The technology they use is cutting-edge.",
-    rating: 5,
-  },
-  {
-    name: "Lisa Park",
-    role: "Patient since 2022",
-    text: "My kids love coming here! The pediatric care is outstanding, and the office is so welcoming. Highly recommend for families.",
-    rating: 5,
-  },
-  {
-    name: "James Wright",
-    role: "Patient since 2017",
-    text: "Best dental practice in the city, hands down. Professional, caring, and always on time. Five stars aren't enough!",
-    rating: 5,
-  },
-];
-
 const Testimonials = () => {
   const [active, setActive] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -65,11 +26,14 @@ const Testimonials = () => {
     );
   }, []);
 
-  const { data: testimonialsData, isLoading } = useGetTestimonialsQuery(undefined);
-  
+  const { data: testimonialsData, isLoading } =
+    useGetTestimonialsQuery(undefined);
+
   const displayTestimonials =
     testimonialsData && testimonialsData.length > 0
-      ? testimonialsData.filter((t: any) => !t.status || t.status === "approved")
+      ? testimonialsData.filter(
+          (t: any) => !t.status || t.status === "approved",
+        )
       : [];
 
   const next = useCallback(() => {
@@ -145,7 +109,9 @@ const Testimonials = () => {
                   <p className="font-heading font-bold">
                     {displayTestimonials[active].name}
                   </p>
-                  <p className="text-sm text-muted-foreground">{displayTestimonials[active].role || "Patient"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {displayTestimonials[active].role || "Patient"}
+                  </p>
                 </div>
               </div>
             </div>
