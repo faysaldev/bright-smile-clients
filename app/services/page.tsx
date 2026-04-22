@@ -22,8 +22,6 @@ import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
 import { useGetAllServicesQuery } from "@/src/redux/features/services/servicesApi";
 import { getIcon } from "@/src/utils/iconMap";
 
-
-
 const insuranceProviders = [
   {
     q: "Delta Dental",
@@ -52,8 +50,6 @@ const Services = () => {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const { data: servicesData, isLoading } = useGetAllServicesQuery(undefined);
-  console.log(servicesData);
-
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!gridRef.current || isLoading) return;

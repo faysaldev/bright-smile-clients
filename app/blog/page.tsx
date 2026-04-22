@@ -16,9 +16,6 @@ const Blog = () => {
     category: filter === "All" ? undefined : filter,
     searchTerm: search || undefined,
   });
-
-  console.log(blogPosts);
-
   const categories = [
     "All",
     "Oral Health",

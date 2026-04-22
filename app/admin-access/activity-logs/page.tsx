@@ -20,9 +20,6 @@ export default function ActivityLogs() {
   const { data: logs, isLoading } = useGetActivityLogsQuery(undefined);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-
-  console.log(logs);
-
   const getActivityIcon = (module: string) => {
     switch (module?.toLowerCase()) {
       case "appointment":

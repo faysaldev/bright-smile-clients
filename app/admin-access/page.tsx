@@ -23,9 +23,6 @@ import Link from "next/link";
 export default function AdminDashboard() {
   const { data: dashboardData, isLoading } =
     useGetDashboardStatsQuery(undefined);
-
-  console.log(dashboardData);
-
   if (isLoading) {
     return (
       <div className="h-[600px] flex items-center justify-center">

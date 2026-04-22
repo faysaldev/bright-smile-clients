@@ -19,9 +19,6 @@ const BlogPost = () => {
 
   const { data: post, isLoading, isError } = useGetPostBySlugQuery(slug);
   const { data: allPosts } = useGetAllPostsQuery({});
-
-  console.log(post);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
@@ -100,7 +97,7 @@ const BlogPost = () => {
             ) : (
               <div className="h-72 sm:h-96 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 mb-10" />
             )}
-            <article 
+            <article
               className="prose prose-slate max-w-none text-slate-700 font-medium leading-relaxed prose-headings:font-black prose-headings:tracking-tight prose-p:text-lg prose-p:leading-8 prose-strong:text-slate-900"
               dangerouslySetInnerHTML={{ __html: post.content }}
             />

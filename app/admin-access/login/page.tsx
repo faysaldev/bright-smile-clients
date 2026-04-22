@@ -27,9 +27,6 @@ export default function AdminLogin() {
 
     try {
       const response = await login({ email, password }).unwrap();
-
-      // The API transformation returns the data object which should contain { user, token }
-      console.log("Login Response:", response);
       if (response?.token) {
         dispatch(
           setUser({
@@ -48,7 +45,6 @@ export default function AdminLogin() {
         throw new Error("Invalid response from server");
       }
     } catch (err: any) {
-      console.error("Login Error:", err);
       toast.error(
         err?.data?.message ||
           err?.message ||
@@ -126,7 +122,8 @@ export default function AdminLogin() {
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing in...
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Signing
+                    in...
                   </>
                 ) : (
                   <>
