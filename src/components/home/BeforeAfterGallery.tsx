@@ -2,6 +2,10 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
 import teethAfter from "@/src/assets/results/teeth-after.png";
 import teethBefore from "@/src/assets/results/teeth-before.png";
+import vennerBefore from "@/src/assets/results/denta-venners.jpg";
+import vennerAfter from "@/src/assets/results/detan-veneer-after.jpg";
+import orthoBefore from "@/src/assets/results/orthodontics-before.jpg";
+import orthoAfter from "@/src/assets/results/orthodontics-after.jpg";
 
 const cases = [
   {
@@ -10,8 +14,18 @@ const cases = [
     before: teethBefore,
     after: teethAfter,
   },
-  { title: "Dental Veneers", desc: "Complete smile transformation" },
-  { title: "Orthodontics", desc: "18-month clear aligner treatment" },
+  {
+    title: "Dental Veneers",
+    desc: "Complete smile transformation",
+    before: vennerBefore,
+    after: vennerAfter,
+  },
+  {
+    title: "Orthodontics",
+    desc: "18-month clear aligner treatment",
+    before: orthoBefore,
+    after: orthoAfter,
+  },
 ];
 
 const ComparisonSlider = ({
@@ -196,11 +210,7 @@ const BeforeAfterGallery = () => {
         <div ref={ref} className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {cases.map((c, i) => (
             <div key={c.title} className="ba-card">
-              <ComparisonSlider
-                index={i}
-                before={c.before}
-                after={c.after}
-              />
+              <ComparisonSlider index={i} before={c.before} after={c.after} />
               <div className="mt-4 text-center">
                 <h3 className="font-heading font-semibold text-lg">
                   {c.title}
