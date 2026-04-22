@@ -1,9 +1,10 @@
 "use client";
 
-import { Lock, Mail, Globe, Clock, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Lock, Mail, Globe, Clock, ShieldCheck, User as UserIcon, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "@/src/redux/features/auth/authSlice";
+import { useChangePasswordMutation } from "@/src/redux/features/auth/authApi";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { toast } from "sonner";
@@ -11,6 +12,11 @@ import { toast } from "sonner";
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("Profile");
   const currentUser = useSelector(selectCurrentUser);
+  const [changePassword, { isLoading: isChanging }] = useChangePasswordMutation();
+  
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -18,14 +24,23 @@ export default function AdminSettings() {
     confirmPassword: "",
   });
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return toast.error("New passwords do not match!");
     }
-    // Simulation of password change
-    toast.success("Password change request submitted!");
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    
+    try {
+      await changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      }).unwrap();
+      
+      toast.success("Password updated successfully!");
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update password.");
+    }
   };
 
   return (
@@ -138,14 +153,27 @@ export default function AdminSettings() {
               <form onSubmit={handlePasswordChange} className="space-y-8 max-w-lg mx-auto sm:mx-0">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Current Password</label>
-                  <Input 
-                    type="password" 
-                    placeholder="••••••••"
-                    value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                    className="h-14 rounded-2xl border-2 border-slate-100 focus:border-primary transition-all bg-slate-50/30 font-medium"
-                    required
-                  />
+                  <div className="relative">
+                    <Input 
+                      type={showCurrentPassword ? "text" : "password"} 
+                      placeholder="••••••••"
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      className="h-14 rounded-2xl border-2 border-slate-100 focus:border-primary transition-all bg-slate-50/30 font-medium pr-12"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showCurrentPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-4 py-2">
@@ -157,32 +185,69 @@ export default function AdminSettings() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">New Password</label>
-                    <Input 
-                      type="password" 
-                      placeholder="Min. 8 chars"
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                      className="h-14 rounded-2xl border-2 border-slate-100 focus:border-primary transition-all bg-slate-50/30 font-medium"
-                      required
-                    />
+                    <div className="relative">
+                      <Input 
+                        type={showNewPassword ? "text" : "password"} 
+                        placeholder="Min. 8 chars"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        className="h-14 rounded-2xl border-2 border-slate-100 focus:border-primary transition-all bg-slate-50/30 font-medium pr-12"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showNewPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">Repeat Password</label>
-                    <Input 
-                      type="password" 
-                      placeholder="Confirm match"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                      className="h-14 rounded-2xl border-2 border-slate-100 focus:border-primary transition-all bg-slate-50/30 font-medium"
-                      required
-                    />
+                    <div className="relative">
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        placeholder="Confirm match"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        className="h-14 rounded-2xl border-2 border-slate-100 focus:border-primary transition-all bg-slate-50/30 font-medium pr-12"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 <div className="pt-6">
-                  <Button type="submit" className="w-full sm:w-auto px-12 h-14 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-1">
-                    Update Password
+                  <Button 
+                    type="submit" 
+                    disabled={isChanging}
+                    className="w-full sm:w-auto px-12 h-14 rounded-[1.5rem] font-black uppercase tracking-widest shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-1"
+                  >
+                    {isChanging ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      "Update Password"
+                    )}
                   </Button>
                 </div>
               </form>
