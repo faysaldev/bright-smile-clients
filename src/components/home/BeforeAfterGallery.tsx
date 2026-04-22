@@ -1,5 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
+import teethAfter from "@/src/assets/results/teeth-after.png";
+import teethBefore from "@/src/assets/results/teeth-before.png";
 
 const cases = [
   { title: "Teeth Whitening", desc: "8 shades brighter in a single session" },

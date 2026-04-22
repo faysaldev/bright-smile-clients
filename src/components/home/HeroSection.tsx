@@ -2,7 +2,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/src/components/ui/button";
 import { CalendarCheck, ArrowRight, Play } from "lucide-react";
-import heroImg from "@/src/assets/hero-clinic.jpeg";
+import heroImg from "@/src/assets/hero-section.png";
 import { useHeroAnimation } from "@/src/hooks/useGsap";
 
 const HeroSection = () => {
@@ -22,7 +22,7 @@ const HeroSection = () => {
           width={1280}
           height={864}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/85 via-foreground/65 to-foreground/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/65 via-foreground/65 to-foreground/20" />
       </div>
 
       {/* Floating decorative elements */}
