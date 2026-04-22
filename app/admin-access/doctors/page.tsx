@@ -12,6 +12,8 @@ import {
   User,
   Image as ImageIcon,
   MoreHorizontal,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import AdminModal from "@/src/components/admin/AdminModal";
 import { toast } from "sonner";
@@ -21,6 +23,7 @@ import {
   useUpdateDoctorMutation,
   useDeleteDoctorMutation,
 } from "@/src/redux/features/doctors/doctorsApi";
+import { useUploadFileMutation } from "@/src/redux/features/assets/assetsApi";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { cn } from "@/src/lib/utils";
@@ -29,11 +32,12 @@ export default function AdminDoctors() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState<any>(null);
-  
+
   const { data: doctors, isLoading } = useGetAllDoctorsQuery(undefined);
   const [createDoctor, { isLoading: isCreating }] = useCreateDoctorMutation();
   const [updateDoctor, { isLoading: isUpdating }] = useUpdateDoctorMutation();
   const [deleteDoctor] = useDeleteDoctorMutation();
+  const [uploadFile, { isLoading: isUploading }] = useUploadFileMutation();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -62,6 +66,27 @@ export default function AdminDoctors() {
       ...formData,
       education: formData.education.filter((_, i) => i !== index),
     });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+
+      try {
+        const res = await uploadFile(uploadFormData).unwrap();
+        const imageUrl = res?.data?.url || res?.url;
+        if (imageUrl) {
+          setFormData((prev) => ({ ...prev, image: imageUrl }));
+          toast.success("Image uploaded successfully");
+        } else {
+          throw new Error("Invalid response from asset server");
+        }
+      } catch (err: any) {
+        toast.error("Failed to upload image");
+      }
+    }
   };
 
   const resetForm = () => {
@@ -125,17 +150,23 @@ export default function AdminDoctors() {
     }
   };
 
-  const filteredDoctors = doctors?.filter((doc: any) =>
-    doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.specialty.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredDoctors =
+    doctors?.filter(
+      (doc: any) =>
+        doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.specialty.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) || [];
 
   return (
-    <div className="space-y-6 animate-fade-up">
+    <div className="space-y-8 animate-fade-up pb-12 min-h-screen">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Doctor Management</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage your clinic specialists and their profiles.</p>
+          <h1 className="text-2xl font-bold text-slate-800">
+            Doctor Management
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Manage your clinic specialists and their profiles.
+          </p>
         </div>
         <Button
           onClick={handleOpenAddModal}
@@ -181,23 +212,34 @@ export default function AdminDoctors() {
                 </tr>
               ) : (
                 filteredDoctors.map((doc: any) => (
-                  <tr key={doc._id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr
+                    key={doc._id}
+                    className="hover:bg-slate-50/50 transition-colors"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 overflow-hidden border border-slate-200">
                           {doc.image ? (
-                            <img src={doc.image} alt={doc.name} className="w-full h-full object-cover" />
+                            <img
+                              src={doc.image}
+                              alt={doc.name}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-slate-400">
                               <User className="w-5 h-5" />
                             </div>
                           )}
                         </div>
-                        <span className="font-bold text-slate-800">{doc.name}</span>
+                        <span className="font-bold text-slate-800">
+                          {doc.name}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-slate-700">{doc.specialty}</p>
+                      <p className="font-medium text-slate-700">
+                        {doc.specialty}
+                      </p>
                       <p className="text-xs text-slate-500">{doc.role}</p>
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-600">
@@ -205,13 +247,20 @@ export default function AdminDoctors() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1 max-w-xs">
-                        {doc.education?.slice(0, 2).map((edu: string, idx: number) => (
-                          <span key={idx} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-medium">
-                            {edu}
-                          </span>
-                        ))}
+                        {doc.education
+                          ?.slice(0, 2)
+                          .map((edu: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-medium"
+                            >
+                              {edu}
+                            </span>
+                          ))}
                         {doc.education?.length > 2 && (
-                          <span className="text-[10px] text-slate-400">+{doc.education.length - 2} more</span>
+                          <span className="text-[10px] text-slate-400">
+                            +{doc.education.length - 2} more
+                          </span>
                         )}
                       </div>
                     </td>
@@ -236,7 +285,10 @@ export default function AdminDoctors() {
               )}
               {!isLoading && filteredDoctors.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-slate-500"
+                  >
                     No doctors found matching your search.
                   </td>
                 </tr>
@@ -251,101 +303,169 @@ export default function AdminDoctors() {
         onClose={() => setIsModalOpen(false)}
         title={editingDoctor ? "Edit Doctor Profile" : "Add New Doctor"}
       >
-        <form onSubmit={handleSubmit} className="space-y-5 max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar p-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
-              <Input
-                placeholder="Dr. Sarah Johnson"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Role</label>
-              <Input
-                placeholder="Senior Orthodontist"
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                required
-              />
-            </div>
-          </div>
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar p-1"
+        >
+          <div className="flex flex-col sm:flex-row gap-8 items-start">
+            <div className="flex flex-col items-center gap-3">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                Doctor Photo
+              </label>
+              <div className="relative group w-32 h-32">
+                <div className="w-full h-full rounded-2xl border-2 border-slate-100 overflow-hidden bg-slate-50 shadow-inner flex items-center justify-center">
+                  {formData.image ? (
+                    <img
+                      src={formData.image}
+                      alt="Preview"
+                      className="w-full h-full object-cover group-hover:opacity-40 transition-opacity"
+                    />
+                  ) : (
+                    <Upload className="w-8 h-8 text-slate-300" />
+                  )}
+                </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Specialty</label>
-              <Input
-                placeholder="Invisalign Expert"
-                value={formData.specialty}
-                onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
-                required
-              />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-2xl pointer-events-none">
+                  <Upload className="w-6 h-6 text-white" />
+                </div>
+
+                {isUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-2xl z-20">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                )}
+              </div>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-tighter">
+                Click to upload photo
+              </p>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Experience</label>
-              <Input
-                placeholder="12+ Years"
-                value={formData.experience}
-                onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                required
-              />
+
+            <div className="flex-1 w-full space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+                    Full Name
+                  </label>
+                  <Input
+                    placeholder="Dr. Sarah Johnson"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+                    Role
+                  </label>
+                  <Input
+                    placeholder="Senior Orthodontist"
+                    value={formData.role}
+                    onChange={(e) =>
+                      setFormData({ ...formData, role: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+                    Specialty
+                  </label>
+                  <Input
+                    placeholder="Invisalign Expert"
+                    value={formData.specialty}
+                    onChange={(e) =>
+                      setFormData({ ...formData, specialty: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+                    Experience
+                  </label>
+                  <Input
+                    placeholder="12+ Years"
+                    value={formData.experience}
+                    onChange={(e) =>
+                      setFormData({ ...formData, experience: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Bio</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+              Bio
+            </label>
             <textarea
               placeholder="Brief professional biography..."
               className="w-full rounded-xl border-2 border-slate-100 bg-background px-4 py-3 text-sm focus:outline-none focus:border-primary transition-all min-h-[100px]"
               value={formData.bio}
-              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, bio: e.target.value })
+              }
               required
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Image URL</label>
-            <div className="flex gap-3">
-              <Input
-                placeholder="https://example.com/dr-sarah.jpg"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                required
-              />
-              {formData.image && (
-                <div className="w-10 h-10 rounded-lg overflow-hidden border-2 border-slate-100 shrink-0">
-                  <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Education</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
+              Education
+            </label>
             <div className="flex gap-2 mb-2">
               <Input
                 placeholder="DDS, Harvard University"
                 value={eduInput}
                 onChange={(e) => setEduInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddEducation())}
+                onKeyPress={(e) =>
+                  e.key === "Enter" &&
+                  (e.preventDefault(), handleAddEducation())
+                }
               />
-              <Button type="button" onClick={handleAddEducation} variant="outline" className="shrink-0">
+              <Button
+                type="button"
+                onClick={handleAddEducation}
+                variant="outline"
+                className="shrink-0"
+              >
                 Add
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.education.map((edu, idx) => (
-                <span key={idx} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 group">
+                <span
+                  key={idx}
+                  className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 group"
+                >
                   {edu}
-                  <button type="button" onClick={() => removeEducation(idx)} className="hover:text-red-500">
+                  <button
+                    type="button"
+                    onClick={() => removeEducation(idx)}
+                    className="hover:text-red-500"
+                  >
                     <Trash2 className="w-3 h-3" />
                   </button>
                 </span>
               ))}
               {formData.education.length === 0 && (
-                <p className="text-xs text-slate-400 italic">No education records added yet.</p>
+                <p className="text-xs text-slate-400 italic">
+                  No education records added yet.
+                </p>
               )}
             </div>
           </div>
@@ -364,7 +484,11 @@ export default function AdminDoctors() {
               disabled={isCreating || isUpdating}
               className="rounded-xl px-10 font-bold shadow-lg shadow-primary/20"
             >
-              {isCreating || isUpdating ? "Saving..." : editingDoctor ? "Update Profile" : "Create Doctor"}
+              {isCreating || isUpdating
+                ? "Saving..."
+                : editingDoctor
+                  ? "Update Profile"
+                  : "Create Doctor"}
             </Button>
           </div>
         </form>
