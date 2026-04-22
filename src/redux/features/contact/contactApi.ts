@@ -21,9 +21,18 @@ const contactApi = baseApi.injectEndpoints({
     }),
     updateInquiryStatus: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/contact/${id}`,
+        url: `/contact/${id}/status`,
         method: "PUT",
         body: data,
+      }),
+      transformResponse: (response: any) => response.data,
+      invalidatesTags: ["Contact"],
+    }),
+    replyToInquiry: builder.mutation({
+      query: ({ id, reply }) => ({
+        url: `/contact/${id}/reply`,
+        method: "PUT",
+        body: { reply },
       }),
       transformResponse: (response: any) => response.data,
       invalidatesTags: ["Contact"],
@@ -35,4 +44,5 @@ export const {
   useSubmitContactFormMutation,
   useViewInquiriesQuery,
   useUpdateInquiryStatusMutation,
+  useReplyToInquiryMutation,
 } = contactApi;

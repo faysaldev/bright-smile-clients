@@ -13,6 +13,7 @@ import {
 import {
   useViewInquiriesQuery,
   useUpdateInquiryStatusMutation,
+  useReplyToInquiryMutation,
 } from "@/src/redux/features/contact/contactApi";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -20,6 +21,8 @@ import { format } from "date-fns";
 export default function AdminContacts() {
   const { data: inquiries, isLoading } = useViewInquiriesQuery({});
   const [updateStatus] = useUpdateInquiryStatusMutation();
+  const [replyToInquiry, { isLoading: isReplying }] =
+    useReplyToInquiryMutation();
 
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -41,8 +44,8 @@ export default function AdminContacts() {
     if (msg.status === "unread") {
       try {
         await updateStatus({ id: msg._id, status: "read" }).unwrap();
-      } catch (error) {
-        console.error("Failed to update status:", error);
+      } catch (error: any) {
+        toast.error(error?.data?.message || "Failed to mark as read.");
       }
     }
   };
@@ -50,25 +53,16 @@ export default function AdminContacts() {
   const handleReply = async () => {
     if (!replyText.trim()) return toast.error("Please type a reply.");
 
-    // Console log the reply section as requested
-    console.log("--- REPLID SENT ---");
-    console.log("To:", activeMessage?.email);
-    console.log("Subject:", activeMessage?.subject);
-    console.log("Reply Message:", replyText);
-    console.log("-------------------");
-
     try {
-      // In a real app, you'd call an email sending API here.
-      // For now, we update the status to "replied" in the database.
-      await updateStatus({
+      await replyToInquiry({
         id: activeMessage?._id,
-        status: "replied",
+        reply: replyText,
       }).unwrap();
 
-      toast.success(`Reply logged for ${activeMessage?.name}`);
+      toast.success(`Reply sent to ${activeMessage?.name}`);
       setReplyText("");
-    } catch (error) {
-      toast.error("Failed to update inquiry status.");
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to send reply.");
     }
   };
 
