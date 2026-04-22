@@ -129,7 +129,7 @@ const BookingPDF = ({ data }: BookingPDFProps) => {
             src="https://res.cloudinary.com/dk3v0m35u/image/upload/q_auto/f_auto/v1776585328/logo-bg_flolyf.png"
             style={styles.logo}
           />
-          <View style={{ alignItems: "right" }}>
+          <View style={{ alignItems: "flex-end" }}>
             <Text style={styles.headerTitle}>Appointment Details</Text>
             <Text style={[styles.label, { textAlign: "right" }]}>
               Generated on {currentDate}

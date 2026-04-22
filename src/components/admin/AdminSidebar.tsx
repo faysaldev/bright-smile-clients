@@ -10,7 +10,8 @@ import {
   Briefcase, 
   Star, 
   Settings,
-  LogOut
+  LogOut,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { label: "Contacts", href: "/admin-access/contact", icon: MessageSquare },
   { label: "Blogs", href: "/admin-access/blog", icon: FileText },
   { label: "Services", href: "/admin-access/services", icon: Briefcase },
+  { label: "Doctors", href: "/admin-access/doctors", icon: User },
   { label: "Testimonials", href: "/admin-access/testimonials", icon: Star },
   { label: "Settings", href: "/admin-access/settings", icon: Settings },
 ];

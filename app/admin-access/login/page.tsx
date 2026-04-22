@@ -37,6 +37,7 @@ export default function AdminLogin() {
               name: response?.name,
               email: response?.email,
               id: response?.id,
+              role: response?.role || "admin",
             },
             token: response?.token,
           }),

@@ -5,6 +5,7 @@ interface User {
   name: string;
   email: string;
   id: string;
+  role: "admin" | "user";
 }
 
 type TAuthState = {
