@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -45,11 +45,38 @@ const insuranceProviders = [
   },
 ];
 
+const ServiceDescription = ({ text }: { text: string }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const words = text.split(" ");
+  const isLong = words.length > 25;
+  const displayText = isExpanded ? text : words.slice(0, 25).join(" ") + (isLong ? "..." : "");
+
+  return (
+    <div className="mb-6">
+      <p className="text-muted-foreground text-sm leading-relaxed transition-all duration-300">
+        {displayText}
+      </p>
+      {isLong && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setIsExpanded(!isExpanded);
+          }}
+          className="text-primary text-xs font-bold mt-2 hover:underline focus:outline-none"
+        >
+          {isExpanded ? "Show Less" : "Read More"}
+        </button>
+      )}
+    </div>
+  );
+};
+
 const Services = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   const { data: servicesData, isLoading } = useGetAllServicesQuery(undefined);
+  
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!gridRef.current || isLoading) return;
@@ -117,7 +144,7 @@ const Services = () => {
               return (
                 <div
                   key={s._id}
-                  className="service-card glass-card p-8 rounded-2xl hover:shadow-xl transition-shadow group"
+                  className="service-card glass-card p-8 rounded-2xl hover:shadow-xl transition-shadow group flex flex-col"
                 >
                   <div className="flex items-start justify-between mb-5">
                     <div className="flex items-center gap-4">
@@ -141,10 +168,10 @@ const Services = () => {
                       </div>
                     </div>
                   </div>
-                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                    {s.description}
-                  </p>
-                  <div className="space-y-2.5 mb-6">
+                  
+                  <ServiceDescription text={s.description} />
+
+                  <div className="space-y-2.5 mb-6 flex-grow">
                     {s.benefits?.map((step: string, i: number) => (
                       <div
                         key={step}
@@ -160,7 +187,7 @@ const Services = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                    className="w-full rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors mt-auto"
                     asChild
                   >
                     <Link href="/booking" className="gap-2">

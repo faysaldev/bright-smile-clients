@@ -58,16 +58,13 @@ const BlogPost = () => {
       <main className="pt-24">
         {/* Hero */}
         <section className="section-padding bg-gradient-to-b from-secondary/50 to-background">
-          <div className="container-narrow max-w-3xl">
+          <div className="container-narrow max-w-6xl px-8">
             <Link
               href="/blog"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
             >
               <ArrowLeft className="w-4 h-4" /> Back to Blog
             </Link>
-            <span className="text-xs font-medium text-primary bg-primary/10 px-3 py-1 rounded-full">
-              {post.category}
-            </span>
             <h1 className="text-3xl sm:text-5xl font-heading font-bold mt-4 mb-6 leading-tight">
               {post.title}
             </h1>
@@ -87,7 +84,7 @@ const BlogPost = () => {
 
         {/* Content */}
         <section className="section-padding pt-0">
-          <div className="container-narrow max-w-3xl">
+          <div className="container-narrow max-w-6xl px-8">
             {post.image ? (
               <img
                 src={post.image}
@@ -97,10 +94,12 @@ const BlogPost = () => {
             ) : (
               <div className="h-72 sm:h-96 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 mb-10" />
             )}
-            <article
-              className="prose prose-slate max-w-none text-slate-700 font-medium leading-relaxed prose-headings:font-black prose-headings:tracking-tight prose-p:text-lg prose-p:leading-8 prose-strong:text-slate-900"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
+            <div className="w-full overflow-hidden">
+              <article
+                className="prose prose-slate max-w-none break-words text-slate-700 font-medium leading-relaxed prose-headings:font-black prose-headings:tracking-tight prose-p:text-lg prose-p:leading-8 prose-strong:text-slate-900"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+            </div>
 
             {/* Share */}
             <div className="mt-12 pt-8 border-t border-border flex items-center justify-between">
