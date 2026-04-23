@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/src/components/ui/button";
 import { CalendarCheck, ArrowRight, Play } from "lucide-react";
 import heroImg from "@/src/assets/hero-section.png";
@@ -15,12 +16,14 @@ const HeroSection = () => {
       className="relative min-h-screen flex items-center overflow-hidden"
     >
       <div className="absolute inset-0">
-        <img
-          src={heroImg.src}
+        <Image
+          src={heroImg}
           alt="Modern dental clinic"
-          className="w-full h-full object-cover"
-          width={1280}
-          height={864}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+          placeholder="blur"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/65 via-foreground/65 to-foreground/20" />
       </div>

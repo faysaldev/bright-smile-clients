@@ -1,32 +1,13 @@
-"use client";
+import { buildPageMetadata } from "@/src/lib/metadata";
+import HomePage from "@/src/views/HomePage";
 
-import HeroSection from "@/src/components/home/HeroSection";
-import TrustBar from "@/src/components/home/TrustBar";
-import ServicesOverview from "@/src/components/home/ServicesOverview";
-import ProcessSection from "@/src/components/home/ProcessSection";
-import WhyChooseUs from "@/src/components/home/WhyChooseUs";
-import DoctorIntro from "@/src/components/home/DoctorIntro";
-import BeforeAfterGallery from "@/src/components/home/BeforeAfterGallery";
-import Testimonials from "@/src/components/home/Testimonials";
-import FAQSection from "@/src/components/home/FAQSection";
-import BookingCTA from "@/src/components/home/BookingCTA";
-import { useScrollReveal } from "@/src/hooks/useGsap";
+export const metadata = buildPageMetadata({
+  title: "BrightSmile Dental — Premium Dental Care",
+  description:
+    "Experience modern dentistry with personalized treatment plans, advanced technology, and a team that truly cares about your comfort. Book your appointment today.",
+  path: "/",
+});
 
-export default function Home() {
-  useScrollReveal();
-
-  return (
-    <>
-      <HeroSection />
-      <TrustBar />
-      <ServicesOverview />
-      <ProcessSection />
-      <WhyChooseUs />
-      <DoctorIntro />
-      <BeforeAfterGallery />
-      <Testimonials />
-      <FAQSection />
-      <BookingCTA />
-    </>
-  );
+export default function Page() {
+  return <HomePage />;
 }

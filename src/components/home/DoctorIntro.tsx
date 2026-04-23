@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import Image from "next/image";
 import { Award } from "lucide-react";
 import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
 import { getIcon } from "@/src/utils/iconMap";
@@ -47,14 +48,16 @@ const DoctorIntro = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="doc-img relative">
             <div className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-xl" />
-            <img
-              src={leadDoctor.image || "/doctor.jpeg"}
-              alt={leadDoctor.name}
-              className="relative rounded-3xl w-full aspect-[4/5] object-cover shadow-2xl"
-              loading="lazy"
-              width={640}
-              height={800}
-            />
+            <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+              <Image
+                src={leadDoctor.image || "/doctor.jpeg"}
+                alt={leadDoctor.name}
+                fill
+                className="object-cover"
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
             <div className="absolute -bottom-4 -right-4 glass-card px-5 py-3 rounded-xl flex items-center gap-3 shadow-lg">
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                 <Award className="w-5 h-5 text-primary-foreground" />

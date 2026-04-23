@@ -1,10 +1,15 @@
-import Navbar from "@/src/components/common/Navbar";
-import Footer from "@/src/components/common/Footer";
+import { buildPageMetadata } from "@/src/lib/metadata";
 
-const Privacy = () => (
-  <>
-    <Navbar />
-    <main className="pt-24">
+export const metadata = buildPageMetadata({
+  title: "Privacy Policy",
+  description:
+    "Read BrightSmile Dental's privacy policy. Learn how we collect, use, and protect your personal information.",
+  path: "/privacy",
+});
+
+export default function PrivacyPage() {
+  return (
+    <main className="pt-8 pb-16">
       <section className="section-padding">
         <div className="container-narrow max-w-3xl prose prose-sm">
           <h1 className="text-4xl font-heading font-bold mb-8">
@@ -53,8 +58,5 @@ const Privacy = () => (
         </div>
       </section>
     </main>
-    <Footer />
-  </>
-);
-
-export default Privacy;
+  );
+}

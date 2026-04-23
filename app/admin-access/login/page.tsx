@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/src/components/ui/button";
 import { Lock, Mail, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 import { useLoginMutation } from "@/src/redux/features/auth/authApi";
@@ -58,7 +59,7 @@ export default function AdminLogin() {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
         <div className="p-8">
           <div className="flex justify-center mb-8">
-            <img src="/logo-bg.png" alt="BrightSmile" className="h-12 w-auto" />
+            <Image src="/logo-bg.png" alt="BrightSmile" width={120} height={48} className="h-12 w-auto" />
           </div>
 
           <div className="animate-fade-up">

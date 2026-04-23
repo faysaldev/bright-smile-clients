@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, Phone } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
@@ -39,7 +40,7 @@ const Navbar = () => {
     >
       <div className="container-narrow flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center">
-          <img src="/logo-bg.png" alt="BrightSmile" className="h-10 w-auto" />
+          <Image src="/logo-bg.png" alt="BrightSmile" width={120} height={40} className="h-10 w-auto" priority />
         </Link>
 
         {/* Desktop */}

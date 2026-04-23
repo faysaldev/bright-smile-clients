@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { useGetSettingsQuery } from "@/src/redux/features/settings/settingsApi";
 
@@ -20,9 +21,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           <div>
             <div className="flex items-center mb-6">
-              <img
+              <Image
                 src="/logo-bg.png"
                 alt="BrightSmile"
+                width={144}
+                height={48}
                 className="h-12 w-auto brightness-0 invert"
               />
             </div>

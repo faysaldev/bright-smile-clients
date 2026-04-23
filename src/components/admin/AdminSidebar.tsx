@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
@@ -32,7 +33,7 @@ export default function AdminSidebar() {
     <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col h-screen sticky top-0">
       <div className="h-16 flex items-center px-6 border-b border-slate-200">
         <Link href="/admin-access" className="flex items-center gap-2">
-          <img src="/logo-bg.png" alt="BrightSmile Admin" className="h-8 w-auto aspect-auto" />
+          <Image src="/logo-bg.png" alt="BrightSmile Admin" width={96} height={32} className="h-8 w-auto" />
         </Link>
       </div>
 

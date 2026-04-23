@@ -1,10 +1,15 @@
-import Navbar from "@/src/components/common/Navbar";
-import Footer from "@/src/components/common/Footer";
+import { buildPageMetadata } from "@/src/lib/metadata";
 
-const Terms = () => (
-  <>
-    <Navbar />
-    <main className="pt-24">
+export const metadata = buildPageMetadata({
+  title: "Terms of Service",
+  description:
+    "Read BrightSmile Dental's terms of service. Understand our policies on appointments, payments, and usage of our services.",
+  path: "/terms",
+});
+
+export default function TermsPage() {
+  return (
+    <main className="pt-8 pb-16">
       <section className="section-padding">
         <div className="container-narrow max-w-3xl prose prose-sm">
           <h1 className="text-4xl font-heading font-bold mb-8">
@@ -52,8 +57,5 @@ const Terms = () => (
         </div>
       </section>
     </main>
-    <Footer />
-  </>
-);
-
-export default Terms;
+  );
+}
