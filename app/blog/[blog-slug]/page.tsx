@@ -172,7 +172,6 @@ const BlogPost = () => {
           </section>
         )}
       </main>
-      <Footer />
     </>
   );
 };
