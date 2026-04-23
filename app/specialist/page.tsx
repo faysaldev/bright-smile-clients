@@ -292,7 +292,7 @@ const Specialists = () => {
             </button>
 
             {/* Left side: Image and quick info */}
-            <div className="lg:w-[35%] relative min-h-[400px] lg:min-h-0 bg-secondary/20">
+            <div className="lg:w-[45%] relative min-h-[400px] lg:min-h-0 bg-secondary/20">
               <img
                 src={selectedDoctor.image}
                 alt={selectedDoctor.name}
@@ -314,7 +314,7 @@ const Specialists = () => {
             </div>
 
             {/* Right side: Detailed info */}
-            <div className="lg:w-[65%] p-6 lg:p-12 flex flex-col">
+            <div className="lg:w-[55%] p-6 lg:p-12 flex flex-col">
               <div className="hidden lg:block mb-8">
                 <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-[9px] font-black uppercase tracking-[0.2em] border border-primary/20">
                   {selectedDoctor.specialty}
@@ -387,7 +387,7 @@ const Specialists = () => {
                             className="flex items-start gap-2.5 group"
                           >
                             <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm font-bold text-muted-foreground leading-snug group-hover:text-foreground transition-colors">
+                            <span className="text-xs font-bold text-muted-foreground leading-snug group-hover:text-foreground transition-colors">
                               {edu}
                             </span>
                           </li>
@@ -408,12 +408,11 @@ const Specialists = () => {
                       {[
                         selectedDoctor.specialty,
                         "Advanced Care",
-                        "Patient Centric",
                         "Modern Dentistry",
                       ].map((item, i) => (
                         <span
                           key={i}
-                          className="px-4 py-2 bg-secondary/80 rounded-xl text-xs font-black tracking-wider uppercase text-foreground/70 border border-primary/5 hover:bg-primary/5 transition-colors cursor-default"
+                          className="px-3 py-2 bg-secondary/80 rounded-xl text-[9px] font-black tracking-wider uppercase text-foreground/70 border border-primary/5 hover:bg-primary/5 transition-colors cursor-default"
                         >
                           {item}
                         </span>
