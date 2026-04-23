@@ -1,6 +1,7 @@
 "use client";
 import doctorImg from "@/src/assets/doctor.jpeg";
 import { Award, Heart, Eye } from "lucide-react";
+import DoctorIntro from "@/src/components/home/DoctorIntro";
 
 const About = () => (
   <>
@@ -55,33 +56,7 @@ const About = () => (
             ))}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <img
-              src={doctorImg.src}
-              alt="Dr. James Mitchell"
-              className="rounded-2xl w-full aspect-[4/5] object-cover"
-              loading="lazy"
-              width={640}
-              height={800}
-            />
-            <div>
-              <h2 className="text-3xl font-heading font-bold mb-4">
-                Meet Dr. James Mitchell
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-4">
-                A graduate of Columbia University College of Dental Medicine,
-                Dr. Mitchell has dedicated his career to transforming smiles and
-                improving oral health. He is a Fellow of the American Academy of
-                Cosmetic Dentistry and regularly attends international
-                conferences to stay at the forefront of dental innovation.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                When he's not in the office, Dr. Mitchell volunteers with dental
-                outreach programs providing free care to underserved
-                communities.
-              </p>
-            </div>
-          </div>
+      <DoctorIntro />
         </div>
       </section>
     </div>

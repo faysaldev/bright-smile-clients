@@ -1,16 +1,27 @@
 import { useRef, useEffect } from "react";
 import { Award } from "lucide-react";
 import { gsap, ScrollTrigger } from "@/src/hooks/useGsap";
-import { useGetAllDoctorsQuery } from "@/src/redux/features/doctors/doctorsApi";
 import { getIcon } from "@/src/utils/iconMap";
+import doctorImg from "@/src/assets/doctor.jpeg";
 
 const DoctorIntro = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const { data: doctors, isLoading } = useGetAllDoctorsQuery(undefined);
-  const leadDoctor = doctors?.find((d: any) => d.isLead) || doctors?.[0];
+  
+  const leadDoctor = {
+    name: "Dr. James Mitchell",
+    role: "Founder & Lead Dentist",
+    image: doctorImg.src,
+    bio: "A graduate of Columbia University College of Dental Medicine, Dr. Mitchell has dedicated his career to transforming smiles and improving oral health. He is a Fellow of the American Academy of Cosmetic Dentistry and regularly attends international conferences to stay at the forefront of dental innovation.",
+    experience: [
+      "20+ Years Clinical Experience",
+      "Columbia University Graduate",
+      "Fellow of AACD",
+      "Outreach Volunteer"
+    ]
+  };
 
   useEffect(() => {
-    if (!ref.current || !leadDoctor) return;
+    if (!ref.current) return;
     const tl = gsap.timeline({
       scrollTrigger: { trigger: ref.current, start: "top 75%" },
     });
@@ -28,9 +39,7 @@ const DoctorIntro = () => {
       tl.kill();
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
-  }, [leadDoctor]);
-
-  if (isLoading || !leadDoctor) return null;
+  }, []);
 
   return (
     <section className="section-padding bg-secondary/30">
@@ -67,33 +76,17 @@ const DoctorIntro = () => {
               {leadDoctor.bio}
             </p>
             <div className="space-y-4">
-              {(() => {
-                let experienceArray: string[] = [];
-                if (Array.isArray(leadDoctor.experience)) {
-                  experienceArray = leadDoctor.experience;
-                } else if (typeof leadDoctor.experience === "string") {
-                  try {
-                    // Try to parse if it's a JSON string
-                    const parsed = JSON.parse(leadDoctor.experience);
-                    experienceArray = Array.isArray(parsed) ? parsed : [leadDoctor.experience];
-                  } catch (e) {
-                    // If not valid JSON, treat as a single string
-                    experienceArray = [leadDoctor.experience];
-                  }
-                }
-
-                return experienceArray.map((exp: string, idx: number) => {
-                  const Icon = getIcon("Award");
-                  return (
-                    <div key={idx} className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <span className="text-sm font-medium">{exp}</span>
+              {leadDoctor.experience.map((exp: string, idx: number) => {
+                const Icon = getIcon("Award");
+                return (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-primary" />
                     </div>
-                  );
-                });
-              })()}
+                    <span className="text-sm font-medium">{exp}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
