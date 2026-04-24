@@ -25,7 +25,7 @@ Bright Smile is a high-performance, aesthetically premium web application design
 
 ### Video Overview
 
-<iframe width="100%" height="500" src="https://www.youtube.com/embed/SQETaWhGN3Y?si=ouM3GjcF7jzAK8o6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Bright Smile Video Overview](https://img.youtube.com/vi/SQETaWhGN3Y/maxresdefault.jpg)](https://www.youtube.com/watch?v=SQETaWhGN3Y)
 
 ---
 
