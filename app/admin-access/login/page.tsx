@@ -9,6 +9,7 @@ import { useLoginMutation } from "@/src/redux/features/auth/authApi";
 import { useAppDispatch } from "@/src/redux/hooks";
 import { setUser } from "@/src/redux/features/auth/authSlice";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
@@ -58,9 +59,15 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
         <div className="p-8">
-          <div className="flex justify-center mb-8">
-            <Image src="/logo-bg.png" alt="BrightSmile" width={120} height={48} className="h-12 w-auto" />
-          </div>
+          <Link href={"/"} className="flex justify-center mb-8">
+            <Image
+              src="/logo-bg.png"
+              alt="BrightSmile"
+              width={120}
+              height={48}
+              className="h-12 w-auto"
+            />
+          </Link>
 
           <div className="animate-fade-up">
             <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">

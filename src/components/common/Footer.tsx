@@ -37,17 +37,17 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm opacity-70">
-              {["Services", "About", "Blog", "FAQ", "Contact"].map((l) => (
-                <li key={l}>
-                  <Link
-                    href={`/${l.toLowerCase()}`}
-                    className="hover:opacity-100 transition-opacity"
-                  >
-                    {l}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                {["Services", "About", "Blog", "FAQ", "Contact"].map((l) => (
+                  <li key={l}>
+                    <Link
+                      href={`/${l.toLowerCase()}`}
+                      className="hover:opacity-100 transition-opacity"
+                    >
+                      {l}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
           </div>
           <div>
             <h4 className="font-heading font-semibold mb-4">Contact</h4>
@@ -75,7 +75,16 @@ const Footer = () => {
           </div>
         </div>
         <div className="border-t border-primary-foreground/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-50">
-          <p>© {new Date().getFullYear()} BrightSmile Dental. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} BrightSmile Dental. All rights
+            reserved.{" "}
+            <Link
+              href="/admin-access/login"
+              className="hover:underline hover:opacity-100 transition-opacity ml-1"
+            >
+              Admin Login
+            </Link>
+          </p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:opacity-100">
               Privacy Policy

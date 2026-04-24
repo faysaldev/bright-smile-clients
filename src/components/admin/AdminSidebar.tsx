@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  CalendarCheck, 
-  MessageSquare, 
-  FileText, 
-  Briefcase, 
-  Star, 
+import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  MessageSquare,
+  FileText,
+  Briefcase,
+  Star,
   Settings,
   LogOut,
   User,
 } from "lucide-react";
+import { logout } from "@/src/redux/features/auth/authSlice";
+import { useAppDispatch } from "@/src/redux/hooks";
 
 const navItems = [
   { label: "Dashboard", href: "/admin-access", icon: LayoutDashboard },
@@ -28,18 +30,33 @@ const navItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/admin-access/login");
+  };
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col h-screen sticky top-0">
       <div className="h-16 flex items-center px-6 border-b border-slate-200">
         <Link href="/admin-access" className="flex items-center gap-2">
-          <Image src="/logo-bg.png" alt="BrightSmile Admin" width={96} height={32} className="h-8 w-auto" />
+          <Image
+            src="/logo-bg.png"
+            alt="BrightSmile Admin"
+            width={96}
+            height={32}
+            className="h-8 w-auto"
+          />
         </Link>
       </div>
 
       <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/admin-access");
+          const isActive =
+            pathname === item.href ||
+            (pathname.startsWith(item.href) && item.href !== "/admin-access");
           const Icon = item.icon;
           return (
             <Link
@@ -59,13 +76,13 @@ export default function AdminSidebar() {
       </div>
 
       <div className="p-4 border-t border-slate-200">
-        <Link
-          href="/admin-access/login"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
         >
           <LogOut className="w-5 h-5" />
           Logout
-        </Link>
+        </button>
       </div>
     </aside>
   );
